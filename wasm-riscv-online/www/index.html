@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RISCV-ONLINE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css">
+    <style>
+        :root {
+            --button-color: #007bff;
+            --button-hover-color: #0056b3;
+            --button-active-color: #004490;
+            --transition-speed: 0.3s;
+        }
+        .result-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 95%; /* 调整宽度 */
+            max-width: 700px; /* 调整最大宽度 */
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .result-container .input-box, .result-container .output-box {
+            flex: 1;
+            padding: 10px;
+        }
+        .result-container .icon-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+        }
+        .result-container .fas {
+            font-size: 1.5em;
+        }
+        body {
+            font-family: '微软雅黑', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #cbd5f3 0%, #f2ebf9 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 95%; /* 调整宽度 */
+            max-width: 700px; /* 调整最大宽度 */
+            height: 150px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: box-shadow var(--transition-speed) ease;
+        }
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            background-image: linear-gradient(to right, var(--button-color) 0%, #00f2fe 100%);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color var(--transition-speed);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        button:hover {
+            background-image: linear-gradient(to right, #00f2fe 0%, var(--button-color) 100%);
+        }
+        button:active {
+            background-color: var(--button-active-color);
+        }
+        button .fas {
+            margin-right: 10px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            left: 20px;
+            display: none;
+        }
+        button.loading .fas {
+            display: block;
+        }
+        button.loading span {
+            visibility: hidden;
+        }
+        #result {
+            width: 90%;
+            max-width: 600px;
+            height: 200px;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            background-color: #fff;
+            padding: 10px;
+            margin: 20px 0;
+            overflow-y: auto;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-family: monospace;
+        }
+        @media (max-width: 768px) {
+            textarea, #result, button {
+                width: 95%;
+            }
+            button {
+                padding-left: 35px;
+            }
+            button .fas {
+                left: 15px;
+            }
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <h1>RISCV-ONLINE</h1>
+    <textarea id="input" placeholder="请输入汇编指令或十六进制机器码"></textarea>
+    <button id="convertButton">
+        <i class="fas fa-sync-alt"></i> 转换/反汇编
+    </button>
+    <div class="result-container">
+        <div class="input-box" id="inputDisplay">
+            <!-- 这里将显示输入的值 -->
+        </div>
+        <div class="icon-box">
+            <i class="fas fa-arrow-right"></i>
+        </div>
+        <div class="output-box" id="outputDisplay">
+            <!-- 这里将显示转换后的结果 -->
+        </div>
+    </div>
+    <!-- 引入 JavaScript 文件 -->
+    <script src="./bootstrap.js" type="module"></script>
+</body>
+</html>
