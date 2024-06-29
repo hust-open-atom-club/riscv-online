@@ -1,5 +1,5 @@
 import * as wasm from 'wasm-riscv-online';
-wasm.greet();
+// wasm.greet();
 
 try {
   const convertButton = document.getElementById('convertButton');

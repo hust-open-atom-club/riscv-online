@@ -12,7 +12,7 @@ pub fn disassemble(input: &str) -> String {
     match input_to_u32(input) {
         Ok(value) => match resolve_u32(value, Xlen::X32) {
             Ok(instruction) => instruction.disassembly(),
-            Err(_) => format!("Error: unsupport instruction"),
+            Err(_) => format!("Error: unsupported instruction"),
         },
         Err(e) => format!("Error: invalid : {}", e),
     }
