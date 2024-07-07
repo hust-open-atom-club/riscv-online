@@ -10,12 +10,31 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 pub fn disassemble(input: &str) -> String {
     match input_to_u32(input) {
-        Ok(value) => match resolve_u32(value, Xlen::X32) {
-            Ok(instruction) => instruction.disassembly(),
-            Err(_) => format!("Error: unsupport instruction"),
-        },
-        Err(e) => format!("Error: invalid : {}", e),
+        Ok(value) => {
+            if is_16_bit_instruction(value) {
+                // Assuming value is truncated to 16-bit for resolve_u16
+                if value > 0xFFFF {
+                    return format!("Error: invalid 16-bit instruction");
+                }
+                match resolve_u16((value & 0xFFFF) as u16, Xlen::X32) {
+                    Ok(instruction) => instruction.disassembly(),
+                    Err(_) => format!("Error: unsupported 16-bit instruction"),
+                }
+            } else {
+                match resolve_u32(value, Xlen::X32) {
+                    Ok(instruction) => instruction.disassembly(),
+                    Err(_) => format!("Error: unsupported 32-bit instruction"),
+                }
+            }
+        }
+        Err(e) => format!("Error: invalid input: {}", e),
     }
+}
+
+fn is_16_bit_instruction(value: u32) -> bool {
+    // Example logic to determine if the instruction is 16-bit
+    // This will vary depending on the actual instruction set specification
+    value & 0b11 != 0b11 // Check if the last two bits are not both 1 (indicating a 32-bit instruction)
 }
 
 #[wasm_bindgen]
@@ -38,6 +57,370 @@ fn input_to_u32(hex_str: &str) -> Result<u32, std::num::ParseIntError> {
 
     // 解析剥离后的字符串为 u32，注意这里的基数是 16
     u32::from_str_radix(trimmed_str, 16)
+}
+
+const OPCODE_C0: u16 = 0b00;
+const OPCODE_C1: u16 = 0b01;
+const OPCODE_C2: u16 = 0b10;
+
+fn resolve_u16(ins: u16, xlen: Xlen) -> core::result::Result<Instruction, ()> {
+    use {self::RVC::*, Instruction::*};
+    let opcode = ins & 0b11;
+    let funct3 = ((ins >> 13) & 0b111) as u8; // keep 0b111 to be explict (actually do not need to & 0b111)
+    let funct2 = ((ins >> 5) & 0b11) as u8;
+    let funct6 = ((ins >> 10) & 0b111111) as u8;
+    let funct4 = ((ins >> 12) & 0b1111) as u8;
+    let ins12 = (ins & (1 << 12)) != 0;
+    let nzuimm549623 = (((ins >> 11) & 0b11) << 4)
+        | (((ins >> 7) & 0b1111) << 6)
+        | (((ins >> 6) & 0b1) << 2)
+        | (((ins >> 5) & 0b1) << 3);
+    let uimm5376 = (((ins >> 10) & 0b111) << 3) | (((ins >> 5) & 0b11) << 6);
+    let uimm54876 =
+        (((ins >> 11) & 0b11) << 4) | (((ins >> 10) & 0b1) << 8) | (((ins >> 5) & 0b11) << 6);
+    let uimm5326 =
+        (((ins >> 11) & 0b111) << 3) | (((ins >> 5) & 0b1) << 6) | (((ins >> 6) & 0b1) << 2);
+    let nzuimm540 = ((ins >> 2) & 0b11111) | (((ins >> 12) & 0b1) << 5);
+    let nzimm540 = nzuimm540;
+    let imm540 = nzuimm540;
+    let imm114981067315 = (((ins >> 3) & 0b11) << 1)
+        | (((ins >> 11) & 0b1) << 3)
+        | (((ins >> 2) & 0b1) << 4)
+        | (((ins >> 7) & 0b1) << 5)
+        | (((ins >> 6) & 0b1) << 6)
+        | (((ins >> 9) & 0b11) << 8)
+        | (((ins >> 8) & 0b1) << 9)
+        | (((ins >> 11) & 0b1) << 10);
+    let nzimm946875 = (((ins >> 12) & 0b1) << 9)
+        | (((ins >> 6) & 0b1) << 4)
+        | (((ins >> 5) & 0b1) << 6)
+        | (((ins >> 3) & 0b11) << 7)
+        | (((ins >> 2) & 0b1) << 5);
+    let nzuimm171612 = {
+        let ins = ins as u32;
+        (((ins >> 12) & 0b1) << 17) | (((ins >> 2) & 0b11111) << 12)
+    };
+    let imm84376215 = (((ins >> 12) & 0b1) << 8)
+        | (((ins >> 10) & 0b11) << 3)
+        | (((ins >> 5) & 0b11) << 6)
+        | (((ins >> 3) & 0b11) << 1)
+        | (((ins >> 2) & 0b11) << 5);
+    let uimm54386 =
+        (((ins >> 12) & 0b1) << 5) | (((ins >> 5) & 0b11) << 3) | (((ins >> 2) & 0b111) << 6);
+    let uimm5_4_96 =
+        (((ins >> 12) & 0b1) << 5) | (((ins >> 6) & 0b1) << 4) | (((ins >> 2) & 0b1111) << 6);
+    let uimm54276 =
+        (((ins >> 12) & 0b1) << 5) | (((ins >> 4) & 0b111) << 2) | (((ins >> 2) & 0b111) << 6);
+    let uimm5386 = (((ins >> 10) & 0b111) << 3) | (((ins >> 7) & 0b111) << 6);
+    let uimm54_96 = (((ins >> 11) & 0b11) << 4) | (((ins >> 7) & 0b1111) << 6);
+    let uimm5276 = (((ins >> 9) & 0b1111) << 3) | (((ins >> 7) & 0b11) << 6);
+    let r24_c = ((ins >> 2) & 0b111) as u8;
+    let r79_c = ((ins >> 7) & 0b111) as u8;
+    let rdrs1 = ((ins >> 7) & 0b11111) as u8;
+    let rs2 = ((ins >> 2) & 0b11111) as u8;
+    let ans = match (opcode, funct3) {
+        (OPCODE_C0, 0b000) if nzuimm549623 != 0 => RVC(Caddi4spn(CIWType {
+            rd: c_reg(r24_c),
+            funct3,
+            uimm: Uimm::new(nzuimm549623 as u32, 10),
+        }))
+        .into(),
+        (OPCODE_C0, 0b001) if xlen == Xlen::X32 || xlen == Xlen::X64 => RVC(Cfld(CLType {
+            rd: c_reg(r24_c),
+            rs1: c_reg(r79_c),
+            funct3,
+            imm: Imm::new(uimm5376 as u32, 8),
+        }))
+        .into(),
+        (OPCODE_C0, 0b001) if xlen == Xlen::X128 => RVC(Clq(CLType {
+            rd: c_reg(r24_c),
+            rs1: c_reg(r79_c),
+            funct3,
+            imm: Imm::new(uimm54876 as u32, 9),
+        }))
+        .into(),
+        (OPCODE_C0, 0b010) => RVC(Clw(CLType {
+            rd: c_reg(r24_c),
+            rs1: c_reg(r79_c),
+            funct3,
+            imm: Imm::new(uimm5326 as u32, 7),
+        }))
+        .into(),
+        (OPCODE_C0, 0b011) if xlen == Xlen::X32 => RVC(Cflw(CLType {
+            rd: c_reg(r24_c),
+            rs1: c_reg(r79_c),
+            funct3,
+            imm: Imm::new(uimm5326 as u32, 7),
+        }))
+        .into(),
+        (OPCODE_C0, 0b011) if xlen == Xlen::X64 || xlen == Xlen::X128 => RVC(Cld(CLType {
+            rd: c_reg(r24_c),
+            rs1: c_reg(r79_c),
+            funct3,
+            imm: Imm::new(uimm5376 as u32, 8),
+        }))
+        .into(),
+        (OPCODE_C0, 0b101) if xlen == Xlen::X32 || xlen == Xlen::X64 => RVC(Cfsd(CSType {
+            rs1: c_reg(r79_c),
+            rs2: c_reg(r24_c),
+            funct3,
+            imm: Imm::new(uimm5376 as u32, 8),
+        }))
+        .into(),
+        (OPCODE_C0, 0b101) if xlen == Xlen::X128 => RVC(Csq(CSType {
+            rs1: c_reg(r79_c),
+            rs2: c_reg(r24_c),
+            funct3,
+            imm: Imm::new(uimm54876 as u32, 9),
+        }))
+        .into(),
+        (OPCODE_C0, 0b110) => RVC(Csw(CSType {
+            rs1: c_reg(r79_c),
+            rs2: c_reg(r24_c),
+            funct3,
+            imm: Imm::new(uimm5326 as u32, 7),
+        }))
+        .into(),
+        (OPCODE_C0, 0b111) if xlen == Xlen::X32 => RVC(Cfsw(CSType {
+            rs1: c_reg(r79_c),
+            rs2: c_reg(r24_c),
+            funct3,
+            imm: Imm::new(uimm5326 as u32, 7),
+        }))
+        .into(),
+        (OPCODE_C0, 0b111) if xlen == Xlen::X64 || xlen == Xlen::X128 => RVC(Csd(CSType {
+            rs1: c_reg(r79_c),
+            rs2: c_reg(r24_c),
+            funct3,
+            imm: Imm::new(uimm5376 as u32, 8),
+        }))
+        .into(),
+        (OPCODE_C1, 0b000) if rdrs1 == 0 => RVC(Cnop(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(nzimm540 as u32, 6),
+        }))
+        .into(),
+        (OPCODE_C1, 0b000) if rdrs1 != 0 => RVC(Caddi(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(nzimm540 as u32, 6),
+        }))
+        .into(),
+        (OPCODE_C1, 0b001) if xlen == Xlen::X32 => RVC(Cjal(CJType {
+            funct3,
+            target: Imm::new(imm114981067315 as u32, 12),
+        }))
+        .into(),
+        (OPCODE_C1, 0b001) if xlen == Xlen::X64 || xlen == Xlen::X128 => RVC(Caddiw(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(imm540 as u32, 6),
+        }))
+        .into(),
+        (OPCODE_C1, 0b010) if rdrs1 != 0 => RVC(Cli(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(imm540 as u32, 6),
+        }))
+        .into(),
+        (OPCODE_C1, 0b011) if rdrs1 == 2 => RVC(Caddi16sp(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(nzimm946875 as u32, 10),
+        }))
+        .into(),
+        (OPCODE_C1, 0b011) if rdrs1 != 2 && rdrs1 != 0 && nzuimm171612 != 0 => RVC(Clui(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(nzuimm171612, 18),
+        }))
+        .into(),
+        (OPCODE_C1, 0b100) => match (funct6 & 0b11, ins12, funct2) {
+            (0b00, _, _) if !(xlen == Xlen::X32 && ins12) && nzuimm540 != 0 => RVC(Csrli(CIType {
+                rdrs1: c_reg(r79_c),
+                funct3,
+                imm: Imm::new(nzuimm540 as u32, 6),
+            }))
+            .into(),
+            (0b00, _, _) if xlen == Xlen::X128 && nzuimm540 == 0 => RVC(Csrli64(CIType {
+                rdrs1: c_reg(r79_c),
+                funct3,
+                imm: Imm::new(nzuimm540 as u32, 6),
+            }))
+            .into(),
+            (0b01, _, _) if !(xlen == Xlen::X32 && ins12) && nzuimm540 != 0 => RVC(Csrai(CIType {
+                rdrs1: c_reg(r79_c),
+                funct3,
+                imm: Imm::new(nzuimm540 as u32, 6),
+            }))
+            .into(),
+            (0b01, _, _) if xlen == Xlen::X128 && nzuimm540 == 0 => RVC(Csrai64(CIType {
+                rdrs1: c_reg(r79_c),
+                funct3,
+                imm: Imm::new(nzuimm540 as u32, 6),
+            }))
+            .into(),
+            (0b10, _, _) => RVC(Candi(CIType {
+                rdrs1: c_reg(r79_c),
+                funct3,
+                imm: Imm::new(imm540 as u32, 6),
+            }))
+            .into(),
+            (0b11, false, 0b00) => RVC(Csub(CAType {
+                rdrs1: c_reg(r79_c),
+                rs2: c_reg(r24_c),
+                funct2,
+                funct6,
+            }))
+            .into(),
+            (0b11, false, 0b01) => RVC(Cxor(CAType {
+                rdrs1: c_reg(r79_c),
+                rs2: c_reg(r24_c),
+                funct2,
+                funct6,
+            }))
+            .into(),
+            (0b11, false, 0b10) => RVC(Cor(CAType {
+                rdrs1: c_reg(r79_c),
+                rs2: c_reg(r24_c),
+                funct2,
+                funct6,
+            }))
+            .into(),
+            (0b11, false, 0b11) => RVC(Cand(CAType {
+                rdrs1: c_reg(r79_c),
+                rs2: c_reg(r24_c),
+                funct2,
+                funct6,
+            }))
+            .into(),
+            (0b11, true, 0b00) if xlen == Xlen::X64 || xlen == Xlen::X128 => RVC(Csubw(CAType {
+                rdrs1: c_reg(r79_c),
+                rs2: c_reg(r24_c),
+                funct2,
+                funct6,
+            }))
+            .into(),
+            (0b11, true, 0b01) if xlen == Xlen::X64 || xlen == Xlen::X128 => RVC(Caddw(CAType {
+                rdrs1: c_reg(r79_c),
+                rs2: c_reg(r24_c),
+                funct2,
+                funct6,
+            }))
+            .into(),
+            _ => Err(())?,
+        },
+        (OPCODE_C1, 0b101) => RVC(Cj(CJType {
+            funct3,
+            target: Imm::new(imm114981067315 as u32, 12),
+        }))
+        .into(),
+        (OPCODE_C1, 0b110) => RVC(Cbeqz(CBType {
+            rs1: c_reg(r79_c),
+            funct3,
+            off: Imm::new(imm84376215 as u32, 9),
+        }))
+        .into(),
+        (OPCODE_C1, 0b111) => RVC(Cbnez(CBType {
+            rs1: c_reg(r79_c),
+            funct3,
+            off: Imm::new(imm84376215 as u32, 9),
+        }))
+        .into(),
+        (OPCODE_C2, 0b000) if rdrs1 != 0 && !(xlen == Xlen::X32 && ins12) && nzuimm540 != 0 => {
+            RVC(Cslli(CIType {
+                rdrs1,
+                funct3,
+                imm: Imm::new(nzuimm540 as u32, 6),
+            }))
+            .into()
+        }
+        (OPCODE_C2, 0b000) if rdrs1 != 0 && xlen == Xlen::X128 && nzuimm540 == 0 => {
+            RVC(Cslli64(CIType {
+                rdrs1,
+                funct3,
+                imm: Imm::new(nzuimm540 as u32, 6),
+            }))
+            .into()
+        }
+        (OPCODE_C2, 0b001) if xlen == Xlen::X32 || xlen == Xlen::X64 => RVC(Cfldsp(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(uimm54386 as u32, 9),
+        }))
+        .into(),
+        (OPCODE_C2, 0b001) if xlen == Xlen::X128 && rdrs1 != 0 => RVC(Clqsp(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(uimm5_4_96 as u32, 10),
+        }))
+        .into(),
+        (OPCODE_C2, 0b010) if rdrs1 != 0 => RVC(Clwsp(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(uimm54276 as u32, 8),
+        }))
+        .into(),
+        (OPCODE_C2, 0b011) if xlen == Xlen::X32 => RVC(Cflwsp(CIType {
+            rdrs1,
+            funct3,
+            imm: Imm::new(uimm54276 as u32, 8),
+        }))
+        .into(),
+        (OPCODE_C2, 0b011) if (xlen == Xlen::X64 || xlen == Xlen::X128) && rdrs1 != 0 => {
+            RVC(Cldsp(CIType {
+                rdrs1,
+                funct3,
+                imm: Imm::new(uimm54386 as u32, 9),
+            }))
+            .into()
+        }
+        (OPCODE_C2, 0b100) => match (ins12, rdrs1, rs2) {
+            (false, _, 0) if rdrs1 != 0 => RVC(Cjr(CRType { rdrs1, rs2, funct4 })).into(),
+            (false, _, _) if rdrs1 != 0 => RVC(Cmv(CRType { rdrs1, rs2, funct4 })).into(),
+            (true, 0, 0) => RVC(Cebreak(CRType { rdrs1, rs2, funct4 })).into(),
+            (true, _, 0) => RVC(Cjalr(CRType { rdrs1, rs2, funct4 })).into(),
+            (true, _, _) if rdrs1 != 0 => RVC(Cadd(CRType { rdrs1, rs2, funct4 })).into(),
+            _ => Err(())?,
+        },
+        (OPCODE_C2, 0b101) if xlen == Xlen::X32 || xlen == Xlen::X64 => RVC(Cfsdsp(CSSType {
+            rs2,
+            funct3,
+            imm: Imm::new(uimm5386 as u32, 9),
+        }))
+        .into(),
+        (OPCODE_C2, 0b101) if xlen == Xlen::X128 => RVC(Csqsp(CSSType {
+            rs2,
+            funct3,
+            imm: Imm::new(uimm54_96 as u32, 10),
+        }))
+        .into(),
+        (OPCODE_C2, 0b110) => RVC(Cswsp(CSSType {
+            rs2,
+            funct3,
+            imm: Imm::new(uimm5276 as u32, 8),
+        }))
+        .into(),
+        (OPCODE_C2, 0b111) if xlen == Xlen::X32 => RVC(Cfswsp(CSSType {
+            rs2,
+            funct3,
+            imm: Imm::new(uimm5276 as u32, 8),
+        }))
+        .into(),
+        (OPCODE_C2, 0b111) if xlen == Xlen::X64 || xlen == Xlen::X128 => RVC(Csdsp(CSSType {
+            rs2,
+            funct3,
+            imm: Imm::new(uimm5386 as u32, 9),
+        }))
+        .into(),
+        _ => Err(())?,
+    };
+    Ok(ans)
+}
+
+fn c_reg(regid: u8) -> u8 {
+    regid + 8
 }
 
 const OPCODE_LOAD: u32 = 0b000_0011;
@@ -600,48 +983,218 @@ pub enum RV32I {
 impl RV32I {
     pub fn to_string(&self) -> String {
         match self {
-            Self::Lui(u) => format!("lui {:?}, {:?}", u.rd, u.imm),
-            Self::Auipc(u) => format!("auipc {:?}, {:?}", u.rd, u.imm),
-            Self::Jal(j) => format!("jal {:?}, {:?}", j.rd, j.imm),
-            Self::Jalr(i) => format!("jalr {:?}, {:?}({:?})", i.rd, i.imm, i.rs1),
+            Self::Lui(u) => format!("lui {}, {:?}", to_register(u.rd), u.imm),
+            Self::Auipc(u) => format!("auipc {}, {:?}", to_register(u.rd), u.imm),
+            Self::Jal(j) => format!("jal {}, {:?}", to_register(j.rd), j.imm),
+            Self::Jalr(i) => format!(
+                "jalr {}, {:?}({})",
+                to_register(i.rd),
+                i.imm,
+                to_register(i.rs1)
+            ),
 
-            Self::Beq(b) => format!("beq {:?}, {:?}, {:?}", b.rs1, b.rs2, b.imm),
-            Self::Bne(b) => format!("bne {:?}, {:?}, {:?}", b.rs1, b.rs2, b.imm),
-            Self::Blt(b) => format!("blt {:?}, {:?}, {:?}", b.rs1, b.rs2, b.imm),
-            Self::Bge(b) => format!("bge {:?}, {:?}, {:?}", b.rs1, b.rs2, b.imm),
-            Self::Bltu(b) => format!("bltu {:?}, {:?}, {:?}", b.rs1, b.rs2, b.imm),
-            Self::Bgeu(b) => format!("bgeu {:?}, {:?}, {:?}", b.rs1, b.rs2, b.imm),
+            Self::Beq(b) => format!(
+                "beq {}, {}, {:?}",
+                to_register(b.rs1),
+                to_register(b.rs2),
+                b.imm
+            ),
+            Self::Bne(b) => format!(
+                "bne {}, {}, {:?}",
+                to_register(b.rs1),
+                to_register(b.rs2),
+                b.imm
+            ),
+            Self::Blt(b) => format!(
+                "blt {}, {}, {:?}",
+                to_register(b.rs1),
+                to_register(b.rs2),
+                b.imm
+            ),
+            Self::Bge(b) => format!(
+                "bge {}, {}, {:?}",
+                to_register(b.rs1),
+                to_register(b.rs2),
+                b.imm
+            ),
+            Self::Bltu(b) => format!(
+                "bltu {}, {}, {:?}",
+                to_register(b.rs1),
+                to_register(b.rs2),
+                b.imm
+            ),
+            Self::Bgeu(b) => format!(
+                "bgeu {}, {}, {:?}",
+                to_register(b.rs1),
+                to_register(b.rs2),
+                b.imm
+            ),
 
-            Self::Lb(i) => format!("lb {:?}, {:?}({:?})", i.rd, i.imm, i.rs1),
-            Self::Lh(i) => format!("lh {:?}, {:?}({:?})", i.rd, i.imm, i.rs1),
-            Self::Lw(i) => format!("lw {:?}, {:?}({:?})", i.rd, i.imm, i.rs1),
-            Self::Lbu(i) => format!("lbu {:?}, {:?}({:?})", i.rd, i.imm, i.rs1),
-            Self::Lhu(i) => format!("lhu {:?}, {:?}({:?})", i.rd, i.imm, i.rs1),
+            Self::Lb(i) => format!(
+                "lb {}, {:?}({})",
+                to_register(i.rd),
+                i.imm,
+                to_register(i.rs1)
+            ),
+            Self::Lh(i) => format!(
+                "lh {}, {:?}({})",
+                to_register(i.rd),
+                i.imm,
+                to_register(i.rs1)
+            ),
+            Self::Lw(i) => format!(
+                "lw {}, {:?}({})",
+                to_register(i.rd),
+                i.imm,
+                to_register(i.rs1)
+            ),
+            Self::Lbu(i) => format!(
+                "lbu {}, {:?}({})",
+                to_register(i.rd),
+                i.imm,
+                to_register(i.rs1)
+            ),
+            Self::Lhu(i) => format!(
+                "lhu {}, {:?}({})",
+                to_register(i.rd),
+                i.imm,
+                to_register(i.rs1)
+            ),
 
-            Self::Sb(s) => format!("sb {:?}, {:?}({:?})", s.rs2, s.imm, s.rs1),
-            Self::Sh(s) => format!("sh {:?}, {:?}({:?})", s.rs2, s.imm, s.rs1),
-            Self::Sw(s) => format!("sw {:?}, {:?}({:?})", s.rs2, s.imm, s.rs1),
+            Self::Sb(s) => format!(
+                "sb {}, {:?}({})",
+                to_register(s.rs2),
+                s.imm,
+                to_register(s.rs1)
+            ),
+            Self::Sh(s) => format!(
+                "sh {}, {:?}({})",
+                to_register(s.rs2),
+                s.imm,
+                to_register(s.rs1)
+            ),
+            Self::Sw(s) => format!(
+                "sw {}, {:?}({})",
+                to_register(s.rs2),
+                s.imm,
+                to_register(s.rs1)
+            ),
 
-            Self::Add(r) => format!("add {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Sub(r) => format!("sub {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Sll(r) => format!("sll {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Slt(r) => format!("slt {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Sltu(r) => format!("sltu {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Xor(r) => format!("xor {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Srl(r) => format!("srl {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Sra(r) => format!("sra {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Or(r) => format!("or {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::And(r) => format!("and {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
+            Self::Add(r) => format!(
+                "add {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Sub(r) => format!(
+                "sub {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Sll(r) => format!(
+                "sll {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Slt(r) => format!(
+                "slt {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Sltu(r) => format!(
+                "sltu {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Xor(r) => format!(
+                "xor {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Srl(r) => format!(
+                "srl {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Sra(r) => format!(
+                "sra {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Or(r) => format!(
+                "or {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::And(r) => format!(
+                "and {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
 
-            Self::Addi(i) => format!("addi {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Slti(i) => format!("slti {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Sltiu(i) => format!("sltiu {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Xori(i) => format!("xori {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Ori(i) => format!("ori {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Andi(i) => format!("andi {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Slli(i) => format!("slli {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm), // TODO shamt，这里先用imm代替
-            Self::Srli(i) => format!("srli {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm), // TODO shamt，这里先用imm代替
-            Self::Srai(i) => format!("srai {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm), // TODO shamt，这里先用imm代替
+            Self::Addi(i) => format!(
+                "addi {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Slti(i) => format!(
+                "slti {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Sltiu(i) => format!(
+                "sltiu {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Xori(i) => format!(
+                "xori {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Ori(i) => format!(
+                "ori {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Andi(i) => format!(
+                "andi {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Slli(i) => format!(
+                "slli {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ), // TODO shamt，这里先用imm代替
+            Self::Srli(i) => format!(
+                "srli {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ), // TODO shamt，这里先用imm代替
+            Self::Srai(i) => format!(
+                "srai {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ), // TODO shamt，这里先用imm代替
 
             Self::Fence(_) => format!("fence"),
             Self::Ecall(_) => format!("ecall"),
@@ -679,27 +1232,117 @@ pub enum RV64I {
 impl RV64I {
     pub fn to_string(&self) -> String {
         match self {
-            Self::Lwu(i) => format!("lwu {:?}, {:?}({:?})", i.rd, i.imm, i.rs1),
-            Self::Ld(i) => format!("ld {:?}, {:?}({:?})", i.rd, i.imm, i.rs1),
-            Self::Sd(s) => format!("sd {:?}, {:?}({:?})", s.rs2, s.imm, s.rs1),
+            Self::Lwu(i) => format!(
+                "lwu {}, {:?}({})",
+                to_register(i.rd),
+                i.imm,
+                to_register(i.rs1)
+            ),
+            Self::Ld(i) => format!(
+                "ld {}, {:?}({})",
+                to_register(i.rd),
+                i.imm,
+                to_register(i.rs1)
+            ),
+            Self::Sd(s) => format!(
+                "sd {}, {:?}({})",
+                to_register(s.rs2),
+                s.imm,
+                to_register(s.rs1)
+            ),
 
-            Self::Sll(r) => format!("sll {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Srl(r) => format!("srl {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Sra(r) => format!("sra {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Slli(i) => format!("slli {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Srli(i) => format!("srli {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Srai(i) => format!("srai {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
+            Self::Sll(r) => format!(
+                "sll {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Srl(r) => format!(
+                "srl {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Sra(r) => format!(
+                "sra {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Slli(i) => format!(
+                "slli {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Srli(i) => format!(
+                "srli {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Srai(i) => format!(
+                "srai {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
 
-            Self::Addiw(i) => format!("addiw {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Slliw(i) => format!("slliw {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Srliw(i) => format!("srliw {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
-            Self::Sraiw(i) => format!("sraiw {:?}, {:?}, {:?}", i.rd, i.rs1, i.imm),
+            Self::Addiw(i) => format!(
+                "addiw {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Slliw(i) => format!(
+                "slliw {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Srliw(i) => format!(
+                "srliw {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
+            Self::Sraiw(i) => format!(
+                "sraiw {}, {}, {:?}",
+                to_register(i.rd),
+                to_register(i.rs1),
+                i.imm
+            ),
 
-            Self::Addw(r) => format!("addw {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Subw(r) => format!("subw {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Sllw(r) => format!("sllw {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Srlw(r) => format!("srlw {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
-            Self::Sraw(r) => format!("sraw {:?}, {:?}, {:?}", r.rd, r.rs1, r.rs2),
+            Self::Addw(r) => format!(
+                "addw {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Subw(r) => format!(
+                "subw {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Sllw(r) => format!(
+                "sllw {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Srlw(r) => format!(
+                "srlw {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Sraw(r) => format!(
+                "sraw {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
         }
     }
 }
@@ -806,8 +1449,269 @@ pub enum RVC {
 
 impl RVC {
     pub fn to_string(&self) -> String {
-        // TODO
-        format!("RVC Instruction")
+        match self {
+            Self::Caddi4spn(ciw) => format!(
+                "c.addi {}, {}, {:?}",
+                to_register(ciw.rd),
+                to_register(2),
+                ciw.uimm
+            ),
+            Self::Cfld(cl) => format!(
+                "c.fld {}, {:?}({})",
+                to_register(cl.rd),
+                cl.imm,
+                to_register(cl.rs1)
+            ),
+            Self::Clq(cl) => format!(
+                "c.lq {}, {:?}({})",
+                to_register(cl.rd),
+                cl.imm,
+                to_register(cl.rs1)
+            ),
+            Self::Clw(cl) => format!(
+                "c.lw {}, {:?}({})",
+                to_register(cl.rd),
+                cl.imm,
+                to_register(cl.rs1)
+            ),
+            Self::Cflw(cl) => format!(
+                "c.flw {}, {:?}({})",
+                to_register(cl.rd),
+                cl.imm,
+                to_register(cl.rs1)
+            ),
+            Self::Cld(cl) => format!(
+                "c.ld {}, {:?}({})",
+                to_register(cl.rd),
+                cl.imm,
+                to_register(cl.rs1)
+            ),
+            Self::Cfsd(cs) => format!(
+                "c.fsd {}, {:?}({})",
+                to_register(cs.rs2),
+                cs.imm,
+                to_register(cs.rs1)
+            ),
+            Self::Csq(cs) => format!(
+                "c.sq {}, {:?}({})",
+                to_register(cs.rs2),
+                cs.imm,
+                to_register(cs.rs1)
+            ),
+            Self::Csw(cs) => format!(
+                "c.sw {}, {:?}({})",
+                to_register(cs.rs2),
+                cs.imm,
+                to_register(cs.rs1)
+            ),
+            Self::Cfsw(cs) => format!(
+                "c.fsw {}, {:?}({})",
+                to_register(cs.rs2),
+                cs.imm,
+                to_register(cs.rs1)
+            ),
+            Self::Csd(cs) => format!(
+                "c.sd {}, {:?}({})",
+                to_register(cs.rs2),
+                cs.imm,
+                to_register(cs.rs1)
+            ),
+
+            Self::Cnop(ci) => format!("c.nop"),
+            Self::Caddi(ci) => format!(
+                "c.addi {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(ci.rdrs1),
+                ci.imm
+            ),
+            Self::Cjal(cj) => format!("c.jal {},{:?}", to_register(0), cj.target),
+            Self::Caddiw(ci) => format!(
+                "c.addiw {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(ci.rdrs1),
+                ci.imm
+            ),
+            Self::Cli(ci) => format!(
+                "c.li {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(0),
+                ci.imm
+            ),
+            Self::Caddi16sp(ci) => format!(
+                "c.addi16sp {}, {}, {:?}",
+                to_register(2),
+                to_register(2),
+                ci.imm
+            ),
+            Self::Clui(ci) => format!("c.lui {}, {:?}", to_register(ci.rdrs1), ci.imm),
+            Self::Csrli(ci) => format!(
+                "c.srli {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(ci.rdrs1),
+                ci.imm
+            ),
+            Self::Csrli64(ci) => format!(
+                "c.srli64 {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(ci.rdrs1),
+                ci.imm
+            ),
+            Self::Csrai(ci) => format!(
+                "c.srai {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(ci.rdrs1),
+                ci.imm,
+            ),
+            Self::Csrai64(ci) => format!(
+                "c.srai64 {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(ci.rdrs1),
+                ci.imm,
+            ),
+            Self::Candi(ci) => format!(
+                "c.andi {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(ci.rdrs1),
+                ci.imm,
+            ),
+            Self::Csub(ca) => format!(
+                "c.sub {}, {}, {}",
+                to_register(ca.rdrs1),
+                to_register(ca.rdrs1),
+                to_register(ca.rs2),
+            ),
+            Self::Cxor(ca) => format!(
+                "c.xor {}, {}, {}",
+                to_register(ca.rdrs1),
+                to_register(ca.rdrs1),
+                to_register(ca.rs2),
+            ),
+            Self::Cor(ca) => format!(
+                "c.or {}, {}, {}",
+                to_register(ca.rdrs1),
+                to_register(ca.rdrs1),
+                to_register(ca.rs2),
+            ),
+            Self::Cand(ca) => format!(
+                "c.and {}, {}, {}",
+                to_register(ca.rdrs1),
+                to_register(ca.rdrs1),
+                to_register(ca.rs2),
+            ),
+            Self::Csubw(ca) => format!(
+                "c.subw {}, {}, {}",
+                to_register(ca.rdrs1),
+                to_register(ca.rdrs1),
+                to_register(ca.rs2),
+            ),
+            Self::Caddw(ca) => format!(
+                "c.addw {}, {}, {}",
+                to_register(ca.rdrs1),
+                to_register(ca.rdrs1),
+                to_register(ca.rs2),
+            ),
+            Self::Cj(cj) => format!("c.j {}, {:?}", to_register(0), cj.target),
+            Self::Cbeqz(cb) => format!(
+                "c.beqz {}, {}, {:?}",
+                to_register(cb.rs1),
+                to_register(0),
+                cb.off
+            ),
+            Self::Cbnez(cb) => format!(
+                "c.bnez {}, {}, {:?}",
+                to_register(cb.rs1),
+                to_register(0),
+                cb.off
+            ),
+
+            Self::Cslli(ci) => format!(
+                "c.slli {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(ci.rdrs1),
+                ci.imm
+            ),
+            Self::Cslli64(ci) => format!(
+                "c.slli64 {}, {}, {:?}",
+                to_register(ci.rdrs1),
+                to_register(ci.rdrs1),
+                ci.imm
+            ),
+            Self::Cfldsp(ci) => format!(
+                "c.fldsp {}, {:?}({})",
+                to_register(ci.rdrs1),
+                ci.imm,
+                to_register(2)
+            ),
+            Self::Clqsp(ci) => format!(
+                "c.lqsp {}, {:?}({})",
+                to_register(ci.rdrs1),
+                ci.imm,
+                to_register(2)
+            ),
+            Self::Clwsp(ci) => format!(
+                "c.lwsp {}, {:?}({})",
+                to_register(ci.rdrs1),
+                ci.imm,
+                to_register(2)
+            ),
+            Self::Cflwsp(ci) => format!(
+                "c.flwsp {}, {:?}({})",
+                to_register(ci.rdrs1),
+                ci.imm,
+                to_register(2)
+            ),
+            Self::Cldsp(ci) => format!(
+                "c.ldsp {}, {:?}({})",
+                to_register(ci.rdrs1),
+                ci.imm,
+                to_register(2)
+            ),
+            Self::Cjr(cr) => format!("c.jr {}, 0({})", to_register(0), to_register(cr.rdrs1)),
+            Self::Cmv(cr) => format!(
+                "c.mv {}, {}, {}",
+                to_register(cr.rdrs1),
+                to_register(0),
+                to_register(cr.rs2)
+            ),
+            Self::Cebreak(cr) => format!("c.ebreak"),
+            Self::Cjalr(cr) => format!("c.jalr {}, 0({})", to_register(1), to_register(cr.rdrs1)),
+            Self::Cadd(cr) => format!(
+                "c.add {}, {}, {}",
+                to_register(cr.rdrs1),
+                to_register(cr.rdrs1),
+                to_register(cr.rs2)
+            ),
+            Self::Cfsdsp(css) => format!(
+                "c.fsdsp {}, {:?}({})",
+                to_register(css.rs2),
+                css.imm,
+                to_register(2)
+            ),
+            Self::Csqsp(css) => format!(
+                "c.sqsp {}, {:?}({})",
+                to_register(css.rs2),
+                css.imm,
+                to_register(2)
+            ),
+            Self::Cswsp(css) => format!(
+                "c.swsp {}, {:?}({})",
+                to_register(css.rs2),
+                css.imm,
+                to_register(2)
+            ),
+            Self::Cfswsp(css) => format!(
+                "c.fswsp {}, {:?}({})",
+                to_register(css.rs2),
+                css.imm,
+                to_register(2)
+            ),
+            Self::Csdsp(css) => format!(
+                "c.sdsp {}, {:?}({})",
+                to_register(css.rs2),
+                css.imm,
+                to_register(2)
+            ),
+        }
     }
 }
 
@@ -959,4 +1863,42 @@ pub struct R4Type {
     pub rs3: u8,
     pub funct3: u8,
     pub funct2: u8,
+}
+
+fn to_register(ins: u8) -> String {
+    match ins {
+        0 => "zero".to_string(),
+        1 => "ra".to_string(),
+        2 => "sp".to_string(),
+        3 => "gp".to_string(),
+        4 => "tp".to_string(),
+        5 => "t0".to_string(),
+        6 => "t1".to_string(),
+        7 => "t2".to_string(),
+        8 => "s0".to_string(),
+        9 => "s1".to_string(),
+        10 => "a0".to_string(),
+        11 => "a1".to_string(),
+        12 => "a2".to_string(),
+        13 => "a3".to_string(),
+        14 => "a4".to_string(),
+        15 => "a5".to_string(),
+        16 => "a6".to_string(),
+        17 => "a7".to_string(),
+        18 => "s2".to_string(),
+        19 => "s3".to_string(),
+        20 => "s4".to_string(),
+        21 => "s5".to_string(),
+        22 => "s6".to_string(),
+        23 => "s7".to_string(),
+        24 => "s8".to_string(),
+        25 => "s9".to_string(),
+        26 => "s10".to_string(),
+        27 => "s11".to_string(),
+        28 => "t3".to_string(),
+        29 => "t4".to_string(),
+        30 => "t5".to_string(),
+        31 => "t6".to_string(),
+        _ => "unknown".to_string(), // For values outside the valid register range
+    }
 }
