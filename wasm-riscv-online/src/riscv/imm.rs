@@ -1,4 +1,4 @@
-use crate::size::{Isize, Usize};
+use super::size::{Isize, Usize};
 
 #[derive(Clone, Copy)]
 pub struct Imm {
