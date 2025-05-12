@@ -10,20 +10,20 @@ try {
   convertButton.addEventListener('click', () => {
       const inputValue = input.value;
       let hexValue = inputValue;
-  
+
       // 检查并补齐输入的十六进制数
       if (hexValue.startsWith("0x") || hexValue.startsWith("0X")) {
           hexValue = hexValue.slice(2);
       }
-    
+
       // 如果输入值不是偶数位，前面补0
       if (hexValue.length % 2 !== 0) {
           hexValue = '0' + hexValue;
       }
-    
+
       // 转换为二进制字符串
       const binaryStr = parseInt(hexValue, 16).toString(2).padStart(32, '0');
-    
+
       // 判断指令位长
       let formattedHexValue;
       if (binaryStr.endsWith('11')) {
@@ -35,16 +35,16 @@ try {
           hexValue = hexValue.padStart(4, '0');
           formattedHexValue = '0x' + hexValue;
       }
-    
+
       let wasmResult;
       // 显示正在处理的图标
       convertButton.classList.add('loading');
       inputDisplay.textContent = `Input: ${formattedHexValue}`;
-    
+
       // 调用 wasm 模块的 disassemble 函数进行反汇编
       wasmResult = wasm.disassemble(formattedHexValue);
       outputDisplay.textContent = `Disassembly: ${wasmResult}`;
-    
+
       // 处理完成后移除正在处理的图标
       setTimeout(() => {
           convertButton.classList.remove('loading');
@@ -56,3 +56,4 @@ try {
   // 同时在页面上显示错误信息
   document.getElementById('outputDisplay').textContent = 'Error loading the WebAssembly module.';
 };
+
