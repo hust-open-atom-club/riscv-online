@@ -1,6 +1,6 @@
 # riscv-online
 
-Online RISC-V assembly development tools.
+A web-based tool for assisting in the analysis of RISC-V disassembly and register values.
 
 ## Setup
 This project is a RISC-V online disassembly website written in Rust WebAssembly and JavaScript.
