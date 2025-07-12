@@ -259,7 +259,7 @@ fn test_rv32i_error_cases() {
 fn test_rv32i_comprehensive_coverage() {  
     let test_cases = vec![  
         ("12345037", "lui"),    // LUI  
-        ("12345017", "auipc"),  // AUIPC  
+        ("12345117", "auipc"),  // AUIPC  
         ("008000ef", "jal"),    // JAL  
         ("004100e7", "jalr"),   // JALR  
         ("00410083", "lb"),     // LB  
