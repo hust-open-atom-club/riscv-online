@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,6 +15,13 @@
             --input-bg-color: #f9f9f9;
             --result-bg-color: #f9f9f9;
             --border-color: #ddd;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
@@ -21,33 +29,104 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            justify-content: flex-start;
+            min-height: 100vh;
             margin: 0;
+            padding: 20px;
             background: linear-gradient(135deg, #cbd5f3 0%, #f2ebf9 100%);
             color: #333;
             line-height: 1.6;
         }
 
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
         h1 {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             color: #0056b3;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+            font-size: 2.2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .help-section {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .help-toggle {
+            background: none;
+            border: none;
+            color: #007bff;
+            cursor: pointer;
+            font-size: 1em;
+            text-decoration: underline;
+            margin-bottom: 10px;
+        }
+
+        .help-content {
+            display: none;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .help-content.show {
+            display: block;
+        }
+
+        .examples {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .example-btn {
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8em;
+            transition: all 0.2s;
+        }
+
+        .example-btn:hover {
+            background: #007bff;
+            color: white;
+        }
+
+        .input-section {
+            position: relative;
+            margin-bottom: 20px;
         }
 
         textarea {
-            width: 95%;
-            max-width: 700px;
+            width: 100%;
             height: 150px;
             margin: 10px 0;
             border-radius: 15px;
-            border: 1px solid var(--border-color);
-            padding: 10px;
+            border: 2px solid var(--border-color);
+            padding: 15px;
             font-size: 16px;
+            font-family: 'Consolas', 'Monaco', monospace;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             background-color: var(--input-bg-color);
-            transition: box-shadow var(--transition-speed) ease, border-color var(--transition-speed) ease;
+            transition: all var(--transition-speed) ease;
+            resize: vertical;
         }
 
         textarea:focus {
@@ -56,62 +135,125 @@
             box-shadow: 0 0 10px rgba(0, 123, 255, 0.2);
         }
 
+        textarea.error {
+            border-color: var(--error-color);
+            box-shadow: 0 0 10px rgba(220, 53, 69, 0.2);
+        }
+
+        textarea.valid {
+            border-color: var(--success-color);
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.2);
+        }
+
+        .input-status {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.8em;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .input-status.valid {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .input-status.error {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .input-status.warning {
+            background: var(--warning-color);
+            color: #333;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
         button {
-            padding: 10px 20px;
-            font-size: 18px;
-            margin: 10px 0;
+            padding: 12px 24px;
+            font-size: 16px;
             border: none;
             border-radius: 15px;
-            background-image: linear-gradient(to right, var(--button-color) 0%, #00f2fe 100%);
-            color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: background-color var(--transition-speed);
+            transition: all var(--transition-speed);
             box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
             position: relative;
             overflow: hidden;
+            min-width: 120px;
         }
 
-        button:hover {
-            background-image: linear-gradient(to right, #00f2fe 0%, var(--button-color) 100%);
+        .btn-primary {
+            background: linear-gradient(to right, var(--button-color) 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(to right, #00f2fe 0%, var(--button-color) 100%);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transform: translateY(-1px);
         }
 
-        button:active {
-            background-color: var(--button-active-color);
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-            transform: translateY(2px);
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
         }
 
         button .fas {
-            margin-right: 10px;
-            animation: spin 1s linear infinite;
-            position: absolute;
-            left: 20px;
-            display: none;
+            margin-right: 8px;
         }
 
         button.loading .fas {
-            display: block;
+            animation: spin 1s linear infinite;
         }
 
-        button.loading span {
-            visibility: hidden;
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
         }
 
         .result-container {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            width: 95%;
-            max-width: 700px;
+            align-items: stretch;
+            width: 100%;
             margin: 20px 0;
-            padding: 10px;
+            padding: 20px;
             border-radius: 15px;
             border: 1px solid var(--border-color);
             background-color: var(--result-bg-color);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: box-shadow var(--transition-speed) ease, border-color var(--transition-speed) ease;
+            transition: all var(--transition-speed) ease;
+            min-height: 120px;
         }
 
         .result-container:hover {
@@ -122,58 +264,188 @@
         .result-container .input-box,
         .result-container .output-box {
             flex: 1;
-            padding: 10px;
+            padding: 15px;
             border-radius: 10px;
             background-color: #fff;
             box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            overflow-wrap: break-word;
+            white-space: pre-wrap;
         }
 
         .result-container .icon-box {
             display: flex;
             justify-content: center;
             align-items: center;
-            width: 50px;
+            width: 60px;
+            font-size: 1.5em;
+            color: #007bff;
         }
 
-        #result {
-            width: 90%;
-            max-width: 600px;
-            height: 200px;
-            border-radius: 10px;
-            border: 1px solid #eee;
-            background-color: #fff;
+        .assembly-output {
+            color: #2d3748;
+        }
+
+        .assembly-instruction {
+            color: #3182ce;
+            font-weight: bold;
+        }
+
+        .assembly-register {
+            color: #38a169;
+        }
+
+        .assembly-immediate {
+            color: #d69e2e;
+        }
+
+        .assembly-error {
+            color: var(--error-color);
+            font-weight: bold;
+        }
+
+        .keyboard-shortcuts {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
             padding: 10px;
-            margin: 20px 0;
-            overflow-y: auto;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            font-family: monospace;
+            border-radius: 5px;
+            font-size: 0.8em;
+            display: none;
+        }
+
+        .keyboard-shortcuts.show {
+            display: block;
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .button-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .result-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .result-container .icon-box {
+                width: 100%;
+                height: 30px;
+                transform: rotate(90deg);
+            }
+
+            .examples {
+                justify-content: center;
+            }
         }
     </style>
 </head>
+
 <body>
-    <h1>RISC-V Online Disassembler</h1>
-    <textarea id="input" placeholder="请输入十六进制机器码"></textarea>
-    <button id="convertButton">
-        <i class="fas fa-sync-alt"></i> 转换/反汇编
-    </button>
-    <div class="result-container">
-        <div class="input-box" id="inputDisplay">
-            <!-- 这里将显示输入的值 -->
+    <div class="container">
+        <h1>RISC-V Online Disassembler</h1>
+        <p class="subtitle">高性能的 RISC-V 反汇编在线工具</p>
+
+        <div class="help-section">
+            <button class="help-toggle" onclick="toggleHelp()">
+                <i class="fas fa-question-circle"></i> 使用说明
+            </button>
+            <div class="help-content" id="helpContent">
+                <p><strong>支持的输入格式：</strong></p>
+                <ul>
+                    <li>十六进制数字：<code>0x12345678</code> 或 <code>12345678</code></li>
+                    <li>多条指令：每行一条指令</li>
+                    <li>GNU objdump 输出格式</li>
+                </ul>
+                <p><strong>快捷键：</strong></p>
+                <ul>
+                    <li><kbd>Ctrl+Enter</kbd> - 执行反汇编</li>
+                    <li><kbd>Esc</kbd> - 清空输入</li>
+                    <li><kbd>F1</kbd> - 显示/隐藏快捷键提示</li>
+                </ul>
+                <p><strong>常用示例：</strong></p>
+                <div class="examples">
+                    <span class="example-btn" onclick="loadExample('0x00000013')">NOP 指令</span>
+                    <span class="example-btn" onclick="loadExample('0x00100093')">ADDI 指令</span>
+                    <span class="example-btn" onclick="loadExample('0x00208233')">ADD 指令</span>
+                    <span class="example-btn" onclick="loadExample('0x8082')">RET 指令 (压缩)</span>
+                    <span class="example-btn" onclick="loadExample('0x4501')">LI 指令 (压缩)</span>
+                </div>
+            </div>
         </div>
-        <div class="icon-box">
-            <i class="fas fa-arrow-right"></i>
+
+        <div class="input-section">
+            <textarea id="input"
+                placeholder="请输入十六进制机器码，支持多行输入...&#10;&#10;示例：&#10;0x00000013&#10;0x00100093&#10;0x00208233"></textarea>
+            <div class="input-status" id="inputStatus"></div>
         </div>
-        <div class="output-box" id="outputDisplay">
-            <!-- 这里将显示转换后的结果 -->
+
+        <div class="error-message" id="errorMessage"></div>
+
+        <div class="button-group">
+            <button id="convertButton" class="btn-primary">
+                <i class="fas fa-sync-alt"></i>
+                <span>转换/反汇编</span>
+            </button>
+            <button id="clearButton" class="btn-secondary">
+                <i class="fas fa-trash"></i>
+                <span>清空</span>
+            </button>
+            <button id="copyButton" class="btn-secondary">
+                <i class="fas fa-copy"></i>
+                <span>复制结果</span>
+            </button>
+        </div>
+
+        <div class="result-container">
+            <div class="input-box" id="inputDisplay">
+                <div style="color: #666; font-style: italic;">输入的机器码将显示在这里...</div>
+            </div>
+            <div class="icon-box">
+                <i class="fas fa-arrow-right"></i>
+            </div>
+            <div class="output-box" id="outputDisplay">
+                <div style="color: #666; font-style: italic;">反汇编结果将显示在这里...</div>
+            </div>
         </div>
     </div>
+
+    <div class="keyboard-shortcuts" id="keyboardShortcuts">
+        <strong>快捷键：</strong><br>
+        Ctrl+Enter: 反汇编<br>
+        Esc: 清空<br>
+        F1: 切换此提示
+    </div>
+
     <!-- 引入 JavaScript 文件 -->
     <script src="./bootstrap.js" type="module"></script>
 </body>
-</html>
 
+</html>
