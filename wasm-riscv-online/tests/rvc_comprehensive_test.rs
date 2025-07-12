@@ -1,4 +1,4 @@
-//Comprehensive test suite for RISC-V 16-bit compressed instructions (RV-C).
+// Comprehensive test suite for RISC-V 16-bit compressed instructions (RV-C).
 
 #![cfg(target_arch = "wasm32")]
 
