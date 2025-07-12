@@ -84,7 +84,11 @@ fn test_error_cases() {
 fn test_instruction_width_detection() {
     // 16-bit instructions (compressed) should not be identified as 32-bit.
     // They do not end with the '11' bits pattern.
-    let compressed_instructions = vec!["0x0001", "0x4082", "0x8000"];
+    let compressed_instructions = vec![
+        "0x0001", // c.nop: No operation (funct3=000, rd=0)
+        "0x4082", // c.lwsp x1, 0(sp): Load word from stack pointer (funct3=010)
+        "0x8000", // c.jr x1: Jump to address in x1 (funct3=100)
+    ];
     for hex in compressed_instructions {
         let result = disassemble(hex);
         assert!(!result.contains("32-bit"),
