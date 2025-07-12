@@ -93,7 +93,10 @@ fn test_instruction_width_detection() {
     
     // 32-bit instructions (standard) should not be identified as 16-bit.
     // They must end with the '11' bits pattern.
-    let standard_instructions = vec!["0x00000013", "0x00100093"];
+    let standard_instructions = vec![
+        "0x00000013", // ADDI x0, x0, 0 (no-op instruction)
+        "0x00100093", // ADDI x1, x0, 1 (adds 1 to x0 and stores in x1)
+    ];
     for hex in standard_instructions {
         let result = disassemble(hex);
         assert!(!result.contains("16-bit"),
