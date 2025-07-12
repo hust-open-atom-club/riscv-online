@@ -8,70 +8,27 @@ use wasm_riscv_online::disassemble;
   
 wasm_bindgen_test_configure!(run_in_browser);  
   
-#[wasm_bindgen_test]  
-fn test_rv32i_lui_instruction() {  
-    // LUI x1, 0x12345 -> 0x12345037  
-    let result = disassemble("12345037");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("lui"));  
-}  
-  
-#[wasm_bindgen_test]  
-fn test_rv32i_auipc_instruction() {  
-    // AUIPC x2, 0x12345 -> 0x12345117  
-    let result = disassemble("12345117");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("auipc"));  
-}  
-  
-#[wasm_bindgen_test]  
-fn test_rv32i_jal_instruction() {  
-    // JAL x1, 8 -> 0x008000ef  
-    let result = disassemble("008000ef");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("jal"));  
-}  
-  
-#[wasm_bindgen_test]  
-fn test_rv32i_jalr_instruction() {  
-    // JALR x1, x2, 4 -> 0x004100e7  
-    let result = disassemble("004100e7");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("jalr"));  
-}  
-  
-#[wasm_bindgen_test]  
-fn test_rv32i_branch_instructions() {  
-    // BEQ x1, x2, 8 -> 0x00208463  
-    let result = disassemble("00208463");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("beq"));  
-  
-    // BNE x1, x2, 8 -> 0x00209463  
-    let result = disassemble("00209463");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("bne"));  
-  
-    // BLT x1, x2, 8 -> 0x0020c463  
-    let result = disassemble("0020c463");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("blt"));  
-  
-    // BGE x1, x2, 8 -> 0x0020d463  
-    let result = disassemble("0020d463");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("bge"));  
-  
-    // BLTU x1, x2, 8 -> 0x0020e463  
-    let result = disassemble("0020e463");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("bltu"));  
-  
-    // BGEU x1, x2, 8 -> 0x0020f463  
-    let result = disassemble("0020f463");  
-    assert!(!result.starts_with("Error"));  
-    assert!(result.contains("bgeu"));  
-}  
+#[wasm_bindgen_test]
+fn test_rv32i_instructions() {
+    let test_cases = vec![
+        ("12345037", "lui"),   // LUI x1, 0x12345 -> 0x12345037
+        ("12345117", "auipc"), // AUIPC x2, 0x12345 -> 0x12345117
+        ("008000ef", "jal"),   // JAL x1, 8 -> 0x008000ef
+        ("004100e7", "jalr"),  // JALR x1, x2, 4 -> 0x004100e7
+        ("00208463", "beq"),   // BEQ x1, x2, 8 -> 0x00208463
+        ("00209463", "bne"),   // BNE x1, x2, 8 -> 0x00209463
+        ("0020c463", "blt"),   // BLT x1, x2, 8 -> 0x0020c463
+        ("0020d463", "bge"),   // BGE x1, x2, 8 -> 0x0020d463
+        ("0020e463", "bltu"),  // BLTU x1, x2, 8 -> 0x0020e463
+        ("0020f463", "bgeu"),  // BGEU x1, x2, 8 -> 0x0020f463
+    ];
+
+    for (encoding, mnemonic) in test_cases {
+        let result = disassemble(encoding);
+        assert!(!result.starts_with("Error"));
+        assert!(result.contains(mnemonic));
+    }
+}
   
 #[wasm_bindgen_test]  
 fn test_rv32i_load_instructions() {  
