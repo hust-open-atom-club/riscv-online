@@ -16,7 +16,7 @@ try {
       hexValue = hexValue.slice(2);
     }
 
-    // 如果输入值不是偶数位，前面补0
+    // 如果输入值不是偶数位，前面补 0
     if (hexValue.length % 2 !== 0) {
       hexValue = '0' + hexValue;
     }
@@ -27,11 +27,11 @@ try {
     // 判断指令位长
     let formattedHexValue;
     if (binaryStr.endsWith('11')) {
-      // 32位指令，确保长度为8个字符
+      // 32 位指令，确保长度为 8 个字符
       hexValue = hexValue.padStart(8, '0');
       formattedHexValue = '0x' + hexValue;
     } else {
-      // 16位指令，确保长度为4个字符
+      // 16 位指令，确保长度为 4 个字符
       hexValue = hexValue.padStart(4, '0');
       formattedHexValue = '0x' + hexValue;
     }
@@ -48,7 +48,7 @@ try {
     // 处理完成后移除正在处理的图标
     setTimeout(() => {
       convertButton.classList.remove('loading');
-    }, 1000); // 假设处理过程需要1秒
+    }, 1000); // 假设处理过程需要 1 秒
   });
 } catch (error) {
   // 如果初始化过程中出现错误，将错误信息记录到控制台
