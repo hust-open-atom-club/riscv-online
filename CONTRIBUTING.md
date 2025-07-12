@@ -4,7 +4,7 @@
 
 ## 项目概述
 
-本项目是一个 Web 端 RISC-V 反汇编工具，将十六进制机器码转换为人类可读的汇编语言。系统采用 Rust 后端编译为 WebAssembly，配合 JavaScript 前端实现高性能的实时反汇编功能。README.md:6
+本项目是一个 Web 端 RISC-V 反汇编工具，将十六进制机器码转换为人类可读的汇编语言。系统采用 Rust 后端编译为 WebAssembly，配合 JavaScript 前端实现高性能的实时反汇编功能。
 
 支持的指令集包括：RV32I、RV64I、RVC（压缩指令）、RVF（浮点）和 RVZicsr（控制状态寄存器）。
 
