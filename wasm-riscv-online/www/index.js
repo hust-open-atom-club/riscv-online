@@ -150,7 +150,7 @@ try {
                 isProcessing = false;
                 convertButton.disabled = false;
                 convertButton.classList.remove('loading');
-            }, 500);
+            }, PROCESSING_DELAY_MS);
         }
     }
 
