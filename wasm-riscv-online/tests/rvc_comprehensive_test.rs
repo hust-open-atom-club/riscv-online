@@ -5,19 +5,17 @@
 extern crate wasm_bindgen_test;
 use wasm_bindgen_test::*;
 
-// Use the `disassemble` function for testing, rather than calling `resolve_u16` directly.
+// Use the `disassemble` function for testing.
 use wasm_riscv_online::disassemble;
 
 wasm_bindgen_test_configure!(run_in_browser);
 
-/// Asserts that the disassembly does not start with "Error".
 fn assert_disassembles_ok(hex: &str, instruction_name: &str) {
     let result = disassemble(hex);
     assert!(!result.starts_with("Error"),
             "Failed to decode {}: {}. Input was {}.", instruction_name, result, hex);
 }
 
-/// Asserts that the disassembly starts with "Error".
 fn assert_disassembles_err(hex: &str, description: &str) {
     let result = disassemble(hex);
     assert!(result.starts_with("Error"),
