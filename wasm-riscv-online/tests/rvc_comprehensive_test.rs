@@ -27,7 +27,7 @@ fn assert_disassembles_err(hex: &str, description: &str) {
 // ## C0 Quadrant Instructions ##
 #[wasm_bindgen_test]
 fn test_c0_quadrant() {
-    // C.ADDI4SPN (funct3=000) - Corrected instruction encoding
+    // C.ADDI4SPN (funct3=000) - c.addi4spn x8, sp, 4
     assert_disassembles_ok("0x1000", "c.addi4spn x8, sp, 4");
     
     // C.LW (funct3=010)
