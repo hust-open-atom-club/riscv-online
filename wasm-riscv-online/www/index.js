@@ -40,7 +40,7 @@ try {
         inputStatus.textContent = validation.message;  
         inputStatus.className = `input-status ${validation.type}`;  
           
-        input.className = validation.valid ? 'valid' : (validation.type === 'error' ? 'error' : '');  
+        input.className = validation.valid ? 'valid' : (validation.type === 'error' ? 'error' : (validation.type === 'warning' ? 'warning' : ''));
     }  
   
     // 显示错误消息  
