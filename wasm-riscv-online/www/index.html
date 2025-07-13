@@ -20,6 +20,18 @@
             --warning-color: #ffc107;
         }
 
+        @media (prefers-color-scheme: dark) {
+        :root {
+            --bg-start: #0d1117;
+            --bg-end:   #161b22;
+            --bg-panel: #21262d;
+            --text:     #c9d1d9;
+            --border:   #30363d;
+            --button-color: #0ea5e9;
+            --button-hover-color: #0284c7;
+             }
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -33,8 +45,9 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
-            background: linear-gradient(135deg, #cbd5f3 0%, #f2ebf9 100%);
-            color: #333;
+            background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-end) 100%);
+            color: var(--text);
+            transition: background .25s, color .25s;
             line-height: 1.6;
         }
 
@@ -392,11 +405,11 @@
                 </ul>
                 <p><strong>常用示例：</strong></p>
                 <div class="examples">
-                    <span class="example-btn" id="exampleBtn1">NOP 指令</span>
-                    <span class="example-btn" id="exampleBtn2">ADDI 指令</span>
-                    <span class="example-btn" id="exampleBtn3">ADD 指令</span>
-                    <span class="example-btn" id="exampleBtn4">RET 指令 (压缩)</span>
-                    <span class="example-btn" id="exampleBtn5">LI 指令 (压缩)</span>
+                    <span class="example-btn" onclick="loadExample('0x00000013')">NOP 指令</span>
+                    <span class="example-btn" onclick="loadExample('0x00100093')">ADDI 指令</span>
+                    <span class="example-btn" onclick="loadExample('0x00208233')">ADD 指令</span>
+                    <span class="example-btn" onclick="loadExample('0x00008067')">RET 指令 (压缩)</span>
+                    <span class="example-btn" onclick="loadExample('0x4501')">LI 指令 (压缩)</span>
                 </div>
             </div>
         </div>
