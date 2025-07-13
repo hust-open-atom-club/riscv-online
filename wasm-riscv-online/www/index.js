@@ -169,6 +169,11 @@ try {
 
     // 复制结果  
     function handleCopy() {
+        if (!outputDisplay.textContent.trim() ||
+            outputDisplay.textContent.includes('将显示在这里')) {
+            showError('暂无结果可复制');
+            return;
+        }
         const outputText = outputDisplay.textContent;
         if (outputText && !outputText.includes('反汇编结果将显示在这里')) {
             navigator.clipboard.writeText(outputText).then(() => {
@@ -188,10 +193,16 @@ try {
     clearButton.addEventListener('click', handleClear);
     copyButton.addEventListener('click', handleCopy);
 
-    // 输入实时验证  
+    // 防抖计时器
+    let inputDebounceTimer = null;
+
+    // 输入实时验证（防抖 300 ms）
     input.addEventListener('input', () => {
-        const validation = validateHexInput(input.value);
-        updateInputStatus(validation);
+        clearTimeout(inputDebounceTimer);          // 取消上一次的计时器
+        inputDebounceTimer = setTimeout(() => {    // 重新计时
+            const validation = validateHexInput(input.value);
+            updateInputStatus(validation);
+        }, 300);  // 300 ms 内没再输入才真正执行
     });
 
     // 键盘快捷键  
