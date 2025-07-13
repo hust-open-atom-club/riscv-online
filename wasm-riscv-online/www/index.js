@@ -1,5 +1,7 @@
 import * as wasm from 'wasm-riscv-online';
 
+const PROCESSING_DELAY_MS = 500;
+
 // 全局变量  
 let isProcessing = false;
 let keyboardShortcutsVisible = false;
