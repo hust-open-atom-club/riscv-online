@@ -74,5 +74,5 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## 📜 License
 
-This project is open-sourced under the **Mulan Permissive Software License, Version 2**.  
+This project is open source under the **Mulan Permissive Software License, Version 2**.  
 See [LICENSE](LICENSE) for the full text.
