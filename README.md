@@ -1,77 +1,77 @@
-# riscv-online
-
-A web-based tool for assisting in the analysis of RISC-V disassembly and register values.
-
-## Setup
-This project is a RISC-V online disassembly website written in Rust WebAssembly and JavaScript.
-
-### Rust Toolchain
-[Rust toolchain](https://www.rust-lang.org/tools/install) including `rustup`, `rustc`, and `cargo`.
-
-Install using rustup(Recommended)
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-```
-
-### wasm-pack 
-[wasm-pack](https://rustwasm.github.io/wasm-pack/installer/) is your one-stop shop for building, testing, and publishing Rust-generated WebAssembly.
-
-Install on Unix, Linux, MacOS with curl
-```bash
-curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-```
-Install from source on Windows and any platform with cargo
-```shell
-cargo install wasm-pack
-```
-
-### npm
-[npm](https://www.npmjs.com/get-npm) is a package manager for JavaScript.
-
-To set up `npm`, [`nodejs`](https://nodejs.org/zh-cn) is required.
-
-Install on Windows with executeable file download from [nodejs homepage](https://nodejs.org/zh-cn)
-
-Install on Macos with [brew](https://brew.sh/)
-
-```bash
-brew install node
-```
-
-Install on Ubuntu with apt
-```
-sudo apt install nodejs npm
-```
-
-Or with other system package manager you like
-
-## Selfhost
-
-### Stepping to build
-
-Download the latest source code.
-
-```shell
-git clone git@github.com:hust-open-atom-club/riscv-online.git
-```
-
-Compile rust code into WebAssembly
-
-```shell
-cd wasm-riscv-online/www
-wasm-pack build
-```
-
-Install JavaScript package
-
-```shell
-npm install
-```
-
-Start local http server
-
-```shell
+<div align="center">  
+  
+# RISC-V Online 🚀  
+  
+[![License](https://img.shields.io/badge/License-Mulan%20PSL%20v2-blue.svg)](http://license.coscl.org.cn/MulanPSL2)  
+[![WebAssembly](https://img.shields.io/badge/WebAssembly-654FF0?logo=webassembly&logoColor=white)](https://webassembly.org/)  
+[![Rust](https://img.shields.io/badge/Rust-000000?logo=rust&logoColor=white)](https://www.rust-lang.org/)  
+[![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)  
+<!-- [![Build Status](https://travis-ci.org/hust-open-atom-club/riscv-online.svg?branch=main)](https://travis-ci.org/hust-open-atom-club/riscv-online)   -->
+  
+**🌐 在线 RISC-V 汇编反汇编工具 | Web-based RISC-V Disassembly Tool**  
+  
+[🇨🇳 中文](README.md) | [🇺🇸 English](README.en.md) | [🔧 贡献指南](CONTRIBUTING.md)  
+  
+</div>  
+  
+## ✨ 项目简介  
+  
+RISC-V Online 是一款基于 WebAssembly 的在线 RISC-V 汇编反汇编工具，专为 RISC-V 开发者、学习者和研究人员设计。
+  
+**15秒快速了解：** 输入十六进制机器码，立即获得 RISC-V 汇编指令 — 无需安装，浏览器即用！
+  
+## 🎯 核心特性  
+  
+- **🔧 即时反汇编** - 支持 16 位和 32 位 RISC-V 指令集
+- **🌐 零安装使用** - 基于 WebAssembly，在浏览器中直接运行  
+- **⚡ 高性能处理** - Rust 编写的核心解析引擎，毫秒级响应  
+- **📱 跨平台支持** - 支持所有现代浏览器，移动端友好  
+- **🎨 直观界面** - 清晰的输入输出，支持多种输入格式  
+- **🔍 智能解析** - 自动识别指令长度，支持 GNU objdump 输出格式  
+  
+## 🚀 快速开始
+  
+### 本地部署  
+  
+```bash  
+# 克隆项目
+git clone https://github.com/hust-open-atom-club/riscv-online.git  
+cd riscv-online  
+  
+# 构建 WebAssembly 模块
+cd wasm-riscv-online  
+wasm-pack build  
+  
+# 安装依赖并启动开发服务器
+cd www  
+npm install  
 npm run start
 ```
 
-Navigate your Web browser to `http://localhost:8080/`. 
+访问 `http://localhost:8080` 即可使用。
+
+## 🛠️ 开发环境  
+  
+### 系统要求  
+  
+| 工具 | 版本要求 | 用途 |  
+|------|----------|------|  
+| Rust | >= 1.56.0 | WebAssembly 编译 |  
+| wasm-pack | >= 0.10.0 | Rust 到 WASM 构建工具 |  
+| Node.js | >= 16.0.0 | 前端开发服务器 |  
+| npm | >= 8.0.0 | 包管理器 |  
+
+## 🤝 贡献指南
+
+我们欢迎所有形式的贡献！请查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详细信息。
+
+### 快速贡献  
+  
+1. **🐛 报告问题** - [创建 Issue](https://github.com/hust-open-atom-club/riscv-online/issues/new)  
+2. **✨ 提交功能** - Fork → 修改 → Pull Request  
+3. **📝 完善文档** - 改进 README 或添加示例  
+4. **🧪 添加测试** - 提高代码覆盖率  
+
+## 📜 许可证
+
+本项目采用 木兰宽松许可证第 2 版 开源。
