@@ -1,4 +1,4 @@
-use super::{CsrIType, CsrRType};
+use super::{to_register, CsrIType, CsrRType}; 
 
 #[derive(Debug, Clone, Copy)]
 pub enum RVZicsr {
@@ -12,7 +12,43 @@ pub enum RVZicsr {
 
 impl RVZicsr {
     pub fn to_string(&self) -> String {
-        // TODO
-        format!("RVZicsr Instruction")
+        match self {  
+            Self::Csrrw(csr) => format!(  
+                "csrrw {}, {:#x}, {}",  
+                to_register(csr.rd),  
+                csr.csr,  
+                to_register(csr.rs1)  
+            ),  
+            Self::Csrrs(csr) => format!(  
+                "csrrs {}, {:#x}, {}",  
+                to_register(csr.rd),  
+                csr.csr,  
+                to_register(csr.rs1)  
+            ),  
+            Self::Csrrc(csr) => format!(  
+                "csrrc {}, {:#x}, {}",  
+                to_register(csr.rd),  
+                csr.csr,  
+                to_register(csr.rs1)  
+            ),  
+            Self::Csrrwi(csr) => format!(  
+                "csrrwi {}, {:#x}, {:?}",  
+                to_register(csr.rd),  
+                csr.csr,  
+                csr.uimm  
+            ),  
+            Self::Csrrsi(csr) => format!(  
+                "csrrsi {}, {:#x}, {:?}",  
+                to_register(csr.rd),  
+                csr.csr,  
+                csr.uimm  
+            ),  
+            Self::Csrrci(csr) => format!(  
+                "csrrci {}, {:#x}, {:?}",  
+                to_register(csr.rd),  
+                csr.csr,  
+                csr.uimm  
+            ),  
+        }  
     }
 }
