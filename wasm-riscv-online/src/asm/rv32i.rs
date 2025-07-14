@@ -246,24 +246,24 @@ impl RV32I {
                 to_register(i.rs1),
                 i.imm
             ),
-            Self::Slli(i) => format!(
-                "slli {}, {}, {:?}",
-                to_register(i.rd),
-                to_register(i.rs1),
-                i.imm
-            ), // TODO shamt，这里先用imm代替
-            Self::Srli(i) => format!(
-                "srli {}, {}, {:?}",
-                to_register(i.rd),
-                to_register(i.rs1),
-                i.imm
-            ), // TODO shamt，这里先用imm代替
-            Self::Srai(i) => format!(
-                "srai {}, {}, {:?}",
-                to_register(i.rd),
-                to_register(i.rs1),
-                i.imm
-            ), // TODO shamt，这里先用imm代替
+            Self::Slli(i) => format!(  
+                "slli {}, {}, {}",  
+                to_register(i.rd),  
+                to_register(i.rs1),  
+                i.imm.low_u32() & 0x1f  
+            ),  
+            Self::Srli(i) => format!(  
+                "srli {}, {}, {}",  
+                to_register(i.rd),  
+                to_register(i.rs1),  
+                i.imm.low_u32() & 0x1f  
+            ),  
+            Self::Srai(i) => format!(  
+                "srai {}, {}, {}",  
+                to_register(i.rd),  
+                to_register(i.rs1),  
+                i.imm.low_u32() & 0x1f 
+            ),
 
             Self::Fence(_) => format!("fence"),
             Self::Ecall(_) => format!("ecall"),
