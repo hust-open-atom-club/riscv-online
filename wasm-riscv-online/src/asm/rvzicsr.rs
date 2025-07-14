@@ -49,6 +49,6 @@ impl RVZicsr {
                 csr.csr,  
                 csr.uimm  
             ),  
-        }  
+        }
     }
 }
