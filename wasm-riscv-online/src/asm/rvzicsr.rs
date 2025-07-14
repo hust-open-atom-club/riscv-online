@@ -12,7 +12,7 @@ pub enum RVZicsr {
 
 impl RVZicsr {
     pub fn to_string(&self) -> String {
-        match self {  
+        match self {
             Self::Csrrw(csr) => format!(  
                 "csrrw {}, {:#x}, {}",  
                 to_register(csr.rd),  
