@@ -1,4 +1,4 @@
-use super::{to_register, CsrIType, CsrRType}; 
+use super::{to_register, CsrIType, CsrRType};
 
 #[derive(Debug, Clone, Copy)]
 pub enum RVZicsr {
