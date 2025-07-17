@@ -198,7 +198,12 @@ fn test_rv32i_system_instructions() {
     // FENCE -> 0x0000000f  
     let result = disassemble("0000000f");  
     assert!(!result.starts_with("Error"));  
-    assert!(result.contains("fence"));  
+    assert!(result.contains("fence"));
+
+    // FENCE.I -> 0x0000100f
+    let result = disassemble("0000100f");
+    assert!(!result.starts_with("Error"));
+    assert!(result.contains("fence.i"));
 }  
   
 #[wasm_bindgen_test]  
@@ -253,6 +258,7 @@ fn test_rv32i_comprehensive_coverage() {
         ("003160b3", "or"),     // OR  
         ("003170b3", "and"),    // AND  
         ("0000000f", "fence"),  // FENCE  
+        ("0000100f", "fence.i"), // FENCE.I
         ("00000073", "ecall"),  // ECALL  
         ("00100073", "ebreak"), // EBREAK  
     ];  

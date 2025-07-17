@@ -68,6 +68,7 @@ const FUNCT12_SYSTEM_ECALL: u32 = 0b000;
 const FUNCT12_SYSTEM_EBREAK: u32 = 0b001;
 
 const FUNCT3_MISC_MEM_FENCE: u8 = 0b000;
+const FUNCT3_MISC_MEM_FENCE_I: u8 = 0b001;
 
 const FUNCT3_WIDTH_W: u8 = 0b010;
 
@@ -217,16 +218,17 @@ pub fn resolve_u32(ins: u32, xlen: Xlen) -> core::result::Result<Instruction, ()
             _ => Err(())?,
         },
         OPCODE_MISC_MEM => match funct3 {
-            FUNCT3_MISC_MEM_FENCE => Fence(i_type).into(),
+            FUNCT3_MISC_MEM_FENCE => Fence(()).into(),
+            FUNCT3_MISC_MEM_FENCE_I => FenceI(()).into(),
             _ => Err(())?,
         },
         OPCODE_SYSTEM => match funct3 {
             FUNCT3_SYSTEM_PRIV => match funct12 {
                 FUNCT12_SYSTEM_ECALL if funct3 == FUNCT3_SYSTEM_PRIV && rs1 == 0 && rd == 0 => {
-                    Ecall(i_type).into()
+                    Ecall(()).into()
                 }
                 FUNCT12_SYSTEM_EBREAK if funct3 == FUNCT3_SYSTEM_PRIV && rs1 == 0 && rd == 0 => {
-                    Ebreak(i_type).into()
+                    Ebreak(()).into()
                 }
                 _ => Err(())?,
             },
