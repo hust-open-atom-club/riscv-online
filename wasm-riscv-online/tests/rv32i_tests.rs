@@ -272,3 +272,22 @@ fn test_rv32i_comprehensive_coverage() {
                 expected_mnemonic, result, hex_input);  
     }  
 }
+
+#[test]
+fn test_rv32m_instructions() {
+    let test_cases = vec![
+        ("02000033", "mul"),     // MUL x0, x0, x0
+        ("02001033", "mulh"),    // MULH x0, x0, x0
+        ("02002033", "mulhsu"),  // MULHSU x0, x0, x0
+        ("02003033", "mulhu"),   // MULHU x0, x0, x0
+        ("02004033", "div"),     // DIV x0, x0, x0
+        ("02005033", "divu"),    // DIVU x0, x0, x0
+        ("02006033", "rem"),     // REM x0, x0, x0
+        ("02007033", "remu"),    // REMU x0, x0, x0
+    ];
+    for (encoding, mnemonic) in test_cases {
+        let result = disassemble(encoding);
+        assert!(!result.starts_with("Error"), "Failed to decode: {}", encoding);
+        assert!(result.contains(mnemonic), "Expected '{}' in '{}'", mnemonic, result);
+    }
+}

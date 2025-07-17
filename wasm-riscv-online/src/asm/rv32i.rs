@@ -325,6 +325,7 @@ impl RV32I {
                 to_register(r.rs1),
                 to_register(r.rs2)
             ),
+
             Self::Fence(_) => format!("fence"),
             Self::FenceI(_) => format!("fence.i"),
             Self::Ecall(_) => format!("ecall"),

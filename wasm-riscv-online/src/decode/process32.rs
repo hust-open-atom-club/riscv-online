@@ -268,22 +268,36 @@ pub fn resolve_u32(ins: u32, xlen: Xlen) -> core::result::Result<Instruction, ()
             FUNCT3_OP_ADD_SUB => match funct7 {
                 FUNCT7_OP_ADD => Add(r_type).into(),
                 FUNCT7_OP_SUB => Sub(r_type).into(),
+                0b000_0001 => Mul(r_type).into(),
+                _ => Err(())?,
+            },
+            FUNCT3_OP_SLL => match funct7 {
+                0 => RV32I::Sll(r_type).into(),
+                0b000_0001 => Mulh(r_type).into(),
                 _ => Err(())?,
             },
             FUNCT3_OP_SLT if funct7 == 0 => Slt(r_type).into(),
             FUNCT3_OP_SLTU if funct7 == 0 => Sltu(r_type).into(),
-            FUNCT3_OP_XOR if funct7 == 0 => Xor(r_type).into(),
-            FUNCT3_OP_OR if funct7 == 0 => Or(r_type).into(),
-            FUNCT3_OP_AND if funct7 == 0 => And(r_type).into(),
-            FUNCT3_OP_SLL if funct7 == 0 && xlen == Xlen::X32 => RV32I::Sll(r_type).into(),
-            FUNCT3_OP_SLL if funct7 & 0b1111110 == 0 && xlen == Xlen::X64 => {
-                RV64I::Sll(r_type).into()
-            }
+            FUNCT3_OP_XOR => match funct7 {
+                0 => Xor(r_type).into(),
+                0b000_0001 => Mulhsu(r_type).into(),
+                _ => Err(())?,
+            },
             FUNCT3_OP_SRL_SRA => match funct7 {
-                FUNCT7_OP_SRL if xlen == Xlen::X32 => RV32I::Srl(r_type).into(),
-                FUNCT7_OP_SRA if xlen == Xlen::X32 => RV32I::Sra(r_type).into(),
-                FUNCT7_OP_SRL if xlen == Xlen::X64 => RV64I::Srl(r_type).into(),
-                FUNCT7_OP_SRA if xlen == Xlen::X64 => RV64I::Sra(r_type).into(),
+                0 => RV32I::Srl(r_type).into(),
+                0b010_0000 => RV32I::Sra(r_type).into(),
+                0b000_0001 => Div(r_type).into(),
+                _ => Err(())?,
+            },
+            FUNCT3_OP_OR => match funct7 {
+                0 => Or(r_type).into(),
+                0b000_0001 => Divu(r_type).into(),
+                _ => Err(())?,
+            },
+            FUNCT3_OP_AND => match funct7 {
+                0 => And(r_type).into(),
+                0b000_0001 if xlen == Xlen::X32 => Rem(r_type).into(),
+                0b000_0001 if xlen == Xlen::X64 => Remu(r_type).into(),
                 _ => Err(())?,
             },
             _ => Err(())?,
