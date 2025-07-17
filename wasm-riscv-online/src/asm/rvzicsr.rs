@@ -32,19 +32,19 @@ impl RVZicsr {
                 to_register(csr.rs1)  
             ),  
             Self::Csrrwi(csr) => format!(  
-                "csrrwi {}, {:#x}, {}",  
+                "csrrwi {}, {:#x}, {:?}",  
                 to_register(csr.rd),  
                 csr.csr,  
                 csr.uimm  
             ),  
             Self::Csrrsi(csr) => format!(  
-                "csrrsi {}, {:#x}, {}",  
+                "csrrsi {}, {:#x}, {:?}",  
                 to_register(csr.rd),  
                 csr.csr,  
                 csr.uimm  
             ),  
             Self::Csrrci(csr) => format!(  
-                "csrrci {}, {:#x}, {}",  
+                "csrrci {}, {:#x}, {:?}",  
                 to_register(csr.rd),  
                 csr.csr,  
                 csr.uimm  
