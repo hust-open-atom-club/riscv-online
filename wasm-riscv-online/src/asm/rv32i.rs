@@ -44,6 +44,15 @@ pub enum RV32I {
     Or(RType),
     And(RType),
 
+    Mul(RType),
+    Mulh(RType),
+    Mulhsu(RType),
+    Mulhu(RType),
+    Div(RType),
+    Divu(RType),
+    Rem(RType),
+    Remu(RType),
+
     Fence(IType),
     Ecall(IType),
     Ebreak(IType),
@@ -263,6 +272,55 @@ impl RV32I {
                 to_register(i.rd),  
                 to_register(i.rs1),  
                 i.imm.low_u32() & 0x1f 
+            ),
+
+            Self::Mul(r) => format!(
+                "mul {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Mulh(r) => format!(
+                "mulh {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Mulhsu(r) => format!(
+                "mulhsu {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Mulhu(r) => format!(
+                "mulhu {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Div(r) => format!(
+                "div {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Divu(r) => format!(
+                "divu {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Rem(r) => format!(
+                "rem {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
+            ),
+            Self::Remu(r) => format!(
+                "remu {}, {}, {}",
+                to_register(r.rd),
+                to_register(r.rs1),
+                to_register(r.rs2)
             ),
 
             Self::Fence(_) => format!("fence"),
