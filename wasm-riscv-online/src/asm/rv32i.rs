@@ -44,6 +44,7 @@ pub enum RV32I {
     Or(RType),
     And(RType),
 
+    // Multiplication and Division instructions
     Mul(RType),
     Mulh(RType),
     Mulhsu(RType),
@@ -53,9 +54,11 @@ pub enum RV32I {
     Rem(RType),
     Remu(RType),
 
-    Fence(IType),
-    Ecall(IType),
-    Ebreak(IType),
+    // System instructions with unit type
+    Fence(()),
+    FenceI(()),
+    Ecall(()),
+    Ebreak(()),
 }
 
 impl RV32I {
@@ -324,6 +327,7 @@ impl RV32I {
             ),
 
             Self::Fence(_) => format!("fence"),
+            Self::FenceI(_) => format!("fence.i"),
             Self::Ecall(_) => format!("ecall"),
             Self::Ebreak(_) => format!("ebreak"),
         }
