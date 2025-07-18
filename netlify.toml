@@ -1,4 +1,4 @@
 [build]
 base = "wasm-riscv-online/www"
-publish = "wasm-riscv-online/www/dist"
+publish = "dist"
 command = "bash netlify-build.sh" 
