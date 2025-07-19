@@ -142,9 +142,8 @@ impl RVC {
                 ci.imm
             ),
             Self::Cli(ci) => format!(
-                "c.li {}, {}, {:?}",
+                "c.li {}, {:?}",
                 to_register(ci.rdrs1),
-                to_register(0),
                 ci.imm
             ),
             Self::Caddi16sp(ci) => format!(
