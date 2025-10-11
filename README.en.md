@@ -30,6 +30,21 @@ Built for RISC-V developers, students and researchers.
 - **🎨 Intuitive UI** – Clean input/output, multiple format support  
 - **🔍 Smart Parsing** – Auto-detects instruction length, GNU objdump-compatible output  
 
+## 📋 Supported Instruction Set Extensions
+
+| Extension | Support Status |
+|-----------|---------------|
+| RV32I     | ✅            |
+| RV64I     | ✅            |
+| RVM       | ✅            |
+| RVC       | ✅            |
+| RV32F     | ✅            |
+| RV64F     | ✅            |
+| RVZicsr   | ✅            |
+| RV32A     | ❌            |
+| RV64D     | ❌            |
+| RVB       | ❌            |
+
 ## 🚀 Quick Start
 
 ### Local Development
