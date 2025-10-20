@@ -72,4 +72,40 @@ impl RV64A {
         }
     }
 }
+ 
+#[derive(Debug, Clone, Copy)]
+pub enum RV128A {
+    // Load-Reserved/Store-Conditional - Quad Word (128-bit)
+    Lrq(RType),
+    Scq(RType),
+    
+    // Atomic Memory Operations - Quad Word (128-bit)
+    Amoswapq(RType),
+    Amoaddq(RType),
+    Amoxorq(RType),
+    Amoandq(RType),
+    Amoorq(RType),
+    Amominq(RType),
+    Amomaxq(RType),
+    Amominuq(RType),
+    Amomaxuq(RType),
+}
+
+impl RV128A {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::Lrq(r) => format!("lr.q {}, {}", to_register(r.rd), to_register(r.rs1)),
+            Self::Scq(r) => format!("sc.q {}, {}", to_register(r.rs2), to_register(r.rs1)),
+            Self::Amoswapq(r) => format!("amoswap.q {} ,{}, {}", to_register(r.rd), to_register(r.rs2), to_register(r.rs1)),
+            Self::Amoaddq(r) => format!("amoadd.q {} ,{}, {}", to_register(r.rd), to_register(r.rs2), to_register(r.rs1)),
+            Self::Amoxorq(r) => format!("amoxor.q {} ,{}, {}", to_register(r.rd), to_register(r.rs2), to_register(r.rs1)),
+            Self::Amoandq(r) => format!("amoand.q {} ,{}, {}", to_register(r.rd), to_register(r.rs2), to_register(r.rs1)),
+            Self::Amoorq(r) => format!("amoor.q {} ,{}, {}", to_register(r.rd), to_register(r.rs2), to_register(r.rs1)),
+            Self::Amominq(r) => format!("amomin.q {} ,{}, {}", to_register(r.rd), to_register(r.rs2), to_register(r.rs1)),
+            Self::Amomaxq(r) => format!("amomax.q {} ,{}, {}", to_register(r.rd), to_register(r.rs2), to_register(r.rs1)),
+            Self::Amominuq(r) => format!("amominu.q {} ,{}, {}", to_register(r.rd), to_register(r.rs2), to_register(r.rs1)),
+            Self::Amomaxuq(r) => format!("amomaxu.q {} ,{}, {}", to_register(r.rd), to_register(r.rs2), to_register(r.rs1)),
+        }
+    }
+}
         

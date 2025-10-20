@@ -118,9 +118,12 @@ const FUNCT5_A_AMOMAX: u8 = 0b10100;
 const FUNCT5_A_AMOMINU: u8 = 0b11000;
 const FUNCT5_A_AMOMAXU: u8 = 0b11100;
 
+// A-extension width for RV128A (.q)
+const FUNCT3_A_WIDTH_Q: u8 = 0b100;
+
 
 pub fn resolve_u32(ins: u32, xlen: Xlen) -> core::result::Result<Instruction, ()> {
-    use crate::asm::{RVZicsr::*, RV32I::*, RV64I::*, RVF::*, RV32A::*,RV64A::*};
+    use crate::asm::{RVZicsr::*, RV32I::*, RV64I::*, RVF::*, RV32A::*,RV64A::*, RV128A::*};
     let opcode = ins & 0b111_1111;
     let rd = ((ins >> 7) & 0b1_1111) as u8;
     let rs1 = ((ins >> 15) & 0b1_1111) as u8;
@@ -514,6 +517,21 @@ pub fn resolve_u32(ins: u32, xlen: Xlen) -> core::result::Result<Instruction, ()
                 FUNCT5_A_AMOMAX => Amomaxd(r_type).into(),
                 FUNCT5_A_AMOMINU => Amominud(r_type).into(),
                 FUNCT5_A_AMOMAXU => Amomaxud(r_type).into(),
+                _ => Err(())?,
+            },
+            // RV128A (.q) width
+            x if x == FUNCT3_A_WIDTH_Q && xlen == Xlen::X128 => match funct5 {
+                FUNCT5_A_LR => Lrq(r_type).into(),
+                FUNCT5_A_SC => Scq(r_type).into(),
+                FUNCT5_A_AMOSWAP => Amoswapq(r_type).into(),
+                FUNCT5_A_AMOADD => Amoaddq(r_type).into(),
+                FUNCT5_A_AMOXOR => Amoxorq(r_type).into(),
+                FUNCT5_A_AMOAND => Amoandq(r_type).into(),
+                FUNCT5_A_AMOOR => Amoorq(r_type).into(),
+                FUNCT5_A_AMOMIN => Amominq(r_type).into(),
+                FUNCT5_A_AMOMAX => Amomaxq(r_type).into(),
+                FUNCT5_A_AMOMINU => Amominuq(r_type).into(),
+                FUNCT5_A_AMOMAXU => Amomaxuq(r_type).into(),
                 _ => Err(())?,
             },
             _ => Err(())?,

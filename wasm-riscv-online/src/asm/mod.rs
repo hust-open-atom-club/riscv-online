@@ -6,6 +6,7 @@ pub use rvf::RVF;
 pub use rvzicsr::RVZicsr;
 pub use rva::RV32A;
 pub use rva::RV64A;
+pub use rva::RV128A;
 use crate::riscv::imm::{Imm, Uimm};
 
 pub mod rv32i;
@@ -24,6 +25,7 @@ pub enum Instruction {
     RVF(RVF),
     RV32A(RV32A),
     RV64A(RV64A),
+    RV128A(RV128A),
 }
 
 impl Instruction {
@@ -36,6 +38,7 @@ impl Instruction {
             Self::RVF(rvf) => rvf.to_string(),
             Self::RV32A(rv32a) => rv32a.to_string(),
             Self::RV64A(rv64a) => rv64a.to_string(),
+            Self::RV128A(rv128a) => rv128a.to_string(),
         }
     }
 }
@@ -79,6 +82,12 @@ impl From<RV32A> for Instruction {
 impl From<RV64A> for Instruction {
     fn from(src: RV64A) -> Instruction {
         Instruction::RV64A(src)
+    }
+}
+
+impl From<RV128A> for Instruction {
+    fn from(src: RV128A) -> Instruction {
+        Instruction::RV128A(src)
     }
 }
 
