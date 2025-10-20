@@ -12,6 +12,7 @@ try {
     const clearButton = document.getElementById('clearButton');
     const copyButton = document.getElementById('copyButton');
     const input = document.getElementById('input');
+    const xlenSelect = document.getElementById('xlenSelect');
     const inputDisplay = document.getElementById('inputDisplay');
     const outputDisplay = document.getElementById('outputDisplay');
     const inputStatus = document.getElementById('inputStatus');
@@ -54,6 +55,16 @@ try {
         }, 5000);
     }
 
+    // 根据 XLEN 模式调用合适的 WASM 导出函数
+    function disassembleByMode(formattedHex) {
+        const mode = xlenSelect ? xlenSelect.value : 'auto';
+        if (mode === 'auto') {
+            return wasm.disassemble_auto(formattedHex);
+        }
+        const xlen = parseInt(mode, 10);
+        return wasm.disassemble_with_xlen(formattedHex, xlen);
+    }
+
     // 处理单条指令  
     function processSingleInstruction(hexValue) {
         // 移除 0x 前缀  
@@ -82,7 +93,7 @@ try {
 
         return {
             formatted: formattedHexValue,
-            result: wasm.disassemble(formattedHexValue)
+            result: disassembleByMode(formattedHexValue)
         };
     }
 

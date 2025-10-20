@@ -183,6 +183,21 @@
             color: #333;
         }
 
+        .arch-section {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0 5px 0;
+        }
+
+        .arch-section select {
+            padding: 6px 10px;
+            background: var(--input-bg-color);
+            color: var(--text);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
         .button-group {
             display: flex;
             gap: 10px;
@@ -415,6 +430,15 @@
         </div>
 
         <div class="input-section">
+            <div class="arch-section">
+                <label for="xlenSelect"><strong>XLEN 架构：</strong></label>
+                <select id="xlenSelect">
+                    <option value="auto" selected>Auto (32/64/128)</option>
+                    <option value="32">32</option>
+                    <option value="64">64</option>
+                    <option value="128">128</option>
+                </select>
+            </div>
             <textarea id="input"
                 placeholder="请输入十六进制机器码，支持多行输入...&#10;&#10;示例：&#10;0x00000013&#10;0x00100093&#10;0x00208233"></textarea>
             <div class="input-status" id="inputStatus"></div>
