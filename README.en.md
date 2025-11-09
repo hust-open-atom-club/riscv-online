@@ -1,3 +1,4 @@
+[README.en.md](https://github.com/user-attachments/files/23439889/README.en.md)
 <div align="center">
 
 # RISC-V Online 🚀
@@ -41,7 +42,7 @@ Built for RISC-V developers, students and researchers.
 | RV32F     | ✅            |
 | RV64F     | ✅            |
 | RVZicsr   | ✅            |
-| RV32A     | ❌            |
+| RV32A     | ✅            |
 | RV64D     | ❌            |
 | RVB       | ❌            |
 
