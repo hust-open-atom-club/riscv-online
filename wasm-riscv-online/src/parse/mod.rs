@@ -3,6 +3,7 @@ mod rv_i;
 mod system;
 mod zicsr;
 mod rvc;
+mod rva;
 use crate::asm::*;
 use crate::riscv::imm::Xlen;
 use self::common::{
@@ -19,10 +20,11 @@ pub fn parse_line(line: &str, xlen: Xlen) -> Result<Instruction, String> {
     let rest = parts.collect::<Vec<_>>().join(" ");
     let ops = if rest.is_empty() { vec![] } else { split_operands(&rest) };
 
-    // New modular dispatch (RVC -> Zicsr -> System -> RV I)
+    // New modular dispatch (RVC -> Zicsr -> System -> RV A -> RV I)
     if let Some(res) = rvc::try_parse(&mnem, &ops, xlen)   { return res; }
     if let Some(res) = zicsr::try_parse(&mnem, &ops, xlen) { return res; }
     if let Some(res) = system::try_parse(&mnem, &ops, xlen){ return res; }
+    if let Some(res) = rva::try_parse(&mnem, &ops, xlen)   { return res; }
     if let Some(res) = rv_i::try_parse(&mnem, &ops, xlen)  { return res; }
     // All known parsers failed; legacy fallback disabled. Return unsupported.
     return Err(format!("未支持的指令: {}", mnem));

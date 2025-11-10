@@ -84,10 +84,11 @@ pub fn encode_u32(inst: &Instruction, _xlen: Xlen) -> Result<u32, String> {
         Instruction::RV32I(i) => encode_rv32i(i),
         Instruction::RV64I(i) => encode_rv64i(i),
         Instruction::RVZicsr(csr) => encode_zicsr(csr),
+        Instruction::RV32A(a) => encode_rv32a(a),
         // RVF/RVC/A extensions will be added later
         Instruction::RVC(_) => Err("RVC (compressed) encoding is not yet supported".into()),
         Instruction::RVF(_) => Err("RVF encoding is not yet supported".into()),
-        Instruction::RV32A(_) | Instruction::RV64A(_) | Instruction::RV128A(_) => Err("A-extension encoding is not yet supported".into()),
+        Instruction::RV64A(_) | Instruction::RV128A(_) => Err("RV64A/RV128A encoding is not yet supported".into()),
     }
 }
 
@@ -275,5 +276,24 @@ fn encode_zicsr(csr: &RVZicsr) -> Result<u32, String> {
         Csrrwi(c)=> i_type(OPCODE_SYSTEM, c.rd, FUNCT3_SYSTEM_CSRRWI, c.uimm.low32() as u8, c.csr as u32),
         Csrrsi(c)=> i_type(OPCODE_SYSTEM, c.rd, FUNCT3_SYSTEM_CSRRSI, c.uimm.low32() as u8, c.csr as u32),
         Csrrci(c)=> i_type(OPCODE_SYSTEM, c.rd, FUNCT3_SYSTEM_CSRRCI, c.uimm.low32() as u8, c.csr as u32),
+    })
+}
+
+fn encode_rv32a(a: &RV32A) -> Result<u32, String> {
+    use RV32A::*;
+    // For RV32A, all instructions use OPCODE_A with funct3 = FUNCT3_LOAD_LW (0b010)
+    // funct7 for A-extension uses the upper 5 bits (funct5) as the operation code
+    Ok(match a {
+        Lrw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_LR as u8) << 2),
+        Scw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_SC as u8) << 2),
+        Amoswapw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_AMOSWAP as u8) << 2),
+        Amoaddw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_AMOADD as u8) << 2),
+        Amoxorw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_AMOXOR as u8) << 2),
+        Amoandw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_AMOAND as u8) << 2),
+        Amoorw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_AMOOR as u8) << 2),
+        Amominw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_AMOMIN as u8) << 2),
+        Amomaxw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_AMOMAX as u8) << 2),
+        Amominuw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_AMOMINU as u8) << 2),
+        Amomaxuw(r) => r_type(OPCODE_A, r.rd, FUNCT3_LOAD_LW, r.rs1, r.rs2, (FUNCT5_A_AMOMAXU as u8) << 2),
     })
 }

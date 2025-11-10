@@ -40,7 +40,7 @@ RISC-V Online 是一款基于 WebAssembly 的在线 RISC-V 汇编反汇编工具
 | RV32F     | ✅      |
 | RV64F     | ✅      |
 | RVZicsr   | ✅      |
-| RV32A     | ❌      |
+| RV32A     | ✅      |
 | RV64D     | ❌      |
 | RVB       | ❌      |
 
@@ -90,5 +90,3 @@ npm run start
 ## 📜 许可证
 
 本项目采用 木兰宽松许可证第 2 版 开源。
-
-dksafhgksadjfhds

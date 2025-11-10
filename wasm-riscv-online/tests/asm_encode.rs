@@ -73,3 +73,50 @@ fn zicsr_and_system() {
     assert_eq!(assemble_with_xlen("ecall", 32).trim(), "0x00000073");
     assert_eq!(assemble_with_xlen("ebreak", 32).trim(), "0x00100073");
 }
+
+#[wasm_bindgen_test]
+fn rv32a_encode() {
+    // LR.W x1, (x2) -> 0x100120AF
+    let out = assemble_with_xlen("lr.w x1, (x2)", 32);
+    assert_eq!(out.trim(), "0x100120af");
+
+    // SC.W x1, x3, (x2) -> 0x183120AF
+    let out = assemble_with_xlen("sc.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0x183120af");
+
+    // AMOSWAP.W x1, x3, (x2) -> 0x083120AF
+    let out = assemble_with_xlen("amoswap.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0x083120af");
+
+    // AMOADD.W x1, x3, (x2) -> 0x003120AF
+    let out = assemble_with_xlen("amoadd.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0x003120af");
+
+    // AMOXOR.W x1, x3, (x2) -> 0x203120AF
+    let out = assemble_with_xlen("amoxor.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0x203120af");
+
+    // AMOAND.W x1, x3, (x2) -> 0x603120AF
+    let out = assemble_with_xlen("amoand.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0x603120af");
+
+    // AMOOR.W x1, x3, (x2) -> 0x403120AF
+    let out = assemble_with_xlen("amoor.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0x403120af");
+
+    // AMOMIN.W x1, x3, (x2) -> 0x803120AF
+    let out = assemble_with_xlen("amomin.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0x803120af");
+
+    // AMOMAX.W x1, x3, (x2) -> 0xA03120AF
+    let out = assemble_with_xlen("amomax.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0xa03120af");
+
+    // AMOMINU.W x1, x3, (x2) -> 0xC03120AF
+    let out = assemble_with_xlen("amominu.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0xc03120af");
+
+    // AMOMAXU.W x1, x3, (x2) -> 0xE03120AF
+    let out = assemble_with_xlen("amomaxu.w x1, x3, (x2)", 32);
+    assert_eq!(out.trim(), "0xe03120af");
+}
