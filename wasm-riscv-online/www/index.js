@@ -7,12 +7,12 @@ const RE_BYTE_STREAM = /^([0-9a-fA-F]{2}(\s+|$))+$/;
 const RE_HEX_LINE = /^(0x|0X)?[0-9a-fA-F]+$/;
 const RE_TWO_HEX = /^[0-9a-fA-F]{2}$/;
 
-// 全局变量  
+// Global state  
 let isProcessing = false;
 let keyboardShortcutsVisible = false;
 
 try {
-    // DOM 元素引用  
+    // DOM element references  
     const convertButton = document.getElementById('convertButton');
     const clearButton = document.getElementById('clearButton');
     const copyButton = document.getElementById('copyButton');
@@ -25,7 +25,7 @@ try {
     const errorMessage = document.getElementById('errorMessage');
     const keyboardShortcuts = document.getElementById('keyboardShortcuts');
 
-    // 输入验证函数（反汇编-十六进制）  
+    // Input validation (disassemble - hex)  
     function validateHexInput(value) {
         const trimmed = value.trim();
         if (!trimmed) {
@@ -37,7 +37,7 @@ try {
             return { valid: true, message: '字节流格式', type: 'valid', format: 'byteStream' };
         }
 
-        // 否则逐行检查每行是否为十六进制串
+        // Otherwise, validate each non-empty line as a hex string
         const lines = value.split('\n').filter(line => line.trim());
 
         for (let i = 0; i < lines.length; i++) {
@@ -50,7 +50,7 @@ try {
         return { valid: true, message: `${lines.length} 条指令`, type: 'valid', format: 'hex' };
     }
 
-    // 输入验证函数（汇编-文本）
+    // Input validation (assemble - text)
     function validateAsmInput(value) {
         const lines = value.split('\n').map(l => l.trim()).filter(Boolean);
         if (lines.length === 0) {
@@ -59,7 +59,7 @@ try {
         return { valid: true, message: `${lines.length} 条指令`, type: 'valid', format: 'asm' };
     }
 
-    // 更新输入状态显示  
+    // Update input status UI  
     function updateInputStatus(validation) {
         inputStatus.textContent = validation.message;
         inputStatus.className = `input-status ${validation.type}`;
@@ -67,7 +67,7 @@ try {
         input.className = validation.valid ? 'valid' : (validation.type === 'error' ? 'error' : '');
     }
 
-    // 显示错误消息  
+    // Show error message  
     function showError(message) {
         errorMessage.textContent = message;
         errorMessage.classList.add('show');
@@ -76,7 +76,7 @@ try {
         }, 5000);
     }
     
-    // 解析 010 Editor 字节流为按行hex指令
+    // Parse 010 Editor byte stream into per-line hex instructions
     function parseByteStream(value) {
         // 规范化空白并分割字节 token（每个 token 应为两位十六进制）
         const tokens = value.replace(RE_LINE_BREAKS, '\n').split(/\s+/).filter(Boolean);
@@ -96,23 +96,23 @@ try {
             if (i + 1 >= lower.length) {
                 throw new Error('指令不完整，剩余字节不足');
             }
-            const b0 = lower[i];     // 低字节（小端）
-            const b1 = lower[i + 1]; // 高字节（小端的高）
+            const b0 = lower[i];     // low byte (little-endian)
+            const b1 = lower[i + 1]; // high byte (little-endian)
             const value16 = (parseInt(b0, 16)) | (parseInt(b1, 16) << 8);
 
-            // 如果最低两位为 11 -> 32 位指令（再读两个字节）
+            // If the lowest two bits are 11 => 32-bit instruction (read two more bytes)
             if ((value16 & 0x3) === 0x3) {
                 if (i + 3 >= lower.length) {
                     throw new Error('指令不完整，剩余字节不足');
                 }
                 const b2 = lower[i + 2];
                 const b3 = lower[i + 3];
-                // 为显示和后续处理生成大端顺序的 hex 字符（b3 b2 b1 b0）
+                // Build big-endian hex string for display and processing (b3 b2 b1 b0)
                 const hexBE = (b3 + b2 + b1 + b0).toLowerCase();
                 instructions.push('0x' + hexBE.padStart(8, '0'));
                 i += 4;
             } else {
-                // 16 位指令，大端顺序 b1 b0
+                // 16-bit instruction, big-endian order b1 b0
                 const hexBE = (b1 + b0).toLowerCase();
                 instructions.push('0x' + hexBE.padStart(4, '0'));
                 i += 2;
@@ -121,7 +121,7 @@ try {
         return instructions;
     }
 
-    // 根据 XLEN 模式调用合适的 WASM 导出函数（反汇编）
+    // Disassemble using WASM by XLEN mode
     function disassembleByMode(formattedHex) {
         const mode = xlenSelect ? xlenSelect.value : 'auto';
         if (mode === 'auto') {
@@ -131,7 +131,7 @@ try {
         return wasm.disassemble_with_xlen(formattedHex, xlen);
     }
 
-    // 根据 XLEN 模式调用合适的 WASM 导出函数（汇编，整块文本）
+    // Assemble using WASM by XLEN mode (whole text)
     function assembleByModeWhole(text) {
         const mode = xlenSelect ? xlenSelect.value : 'auto';
         if (mode === 'auto') {
@@ -141,28 +141,28 @@ try {
         return wasm.assemble_with_xlen(text, xlen);
     }
 
-    // 处理单条指令  
+    // Process a single instruction  
     function processSingleInstruction(hexValue) {
-        // 移除 0x 前缀  
+        // Remove 0x prefix  
         if (hexValue.startsWith("0x") || hexValue.startsWith("0X")) {
             hexValue = hexValue.slice(2);
         }
 
-        // 补齐偶数位  
+        // Pad to even length  
         if (hexValue.length % 2 !== 0) {
             hexValue = '0' + hexValue;
         }
 
-        // 转换为二进制判断指令长度  
+        // Convert to binary to determine instruction length  
         const binaryStr = parseInt(hexValue, 16).toString(2).padStart(32, '0');
 
         let formattedHexValue;
         if (binaryStr.endsWith('11')) {
-            // 32 位指令  
+            // 32-bit instruction  
             hexValue = hexValue.padStart(8, '0');
             formattedHexValue = '0x' + hexValue;
         } else {
-            // 16 位指令  
+            // 16-bit instruction  
             hexValue = hexValue.padStart(4, '0');
             formattedHexValue = '0x' + hexValue;
         }
@@ -173,13 +173,13 @@ try {
         };
     }
 
-    // 语法高亮处理  
+    // Syntax highlighting  
     function highlightAssembly(text) {
         if (text.startsWith('Error:')) {
             return `<span class="assembly-error">${text}</span>`;
         }
 
-        // 简单的语法高亮  
+        // Basic syntax highlighting  
         return text
             .replace(/\b(add|sub|mul|div|addi|subi|lw|sw|beq|bne|jal|jalr|nop|ret|li)\b/gi,
                 '<span class="assembly-instruction">$1</span>')
@@ -189,7 +189,7 @@ try {
                 '<span class="assembly-immediate">$1</span>');
     }
 
-    // 主要的转换处理函数（根据模式分支）  
+    // Main conversion handler (branch by mode)  
     function handleConversion() {
         if (isProcessing) return;
         const mode = modeSelect ? modeSelect.value : 'disassemble';
@@ -248,7 +248,7 @@ try {
         }
     }
 
-    // 清空输入  
+    // Clear input  
     function handleClear() {
         input.value = '';
         inputDisplay.innerHTML = '<div style="color: #666; font-style: italic;">输入的机器码将显示在这里...</div>';
@@ -259,7 +259,7 @@ try {
         input.focus();
     }
 
-    // 复制结果  
+    // Copy result  
     function handleCopy() {
         if (!outputDisplay.textContent.trim() ||
             outputDisplay.textContent.includes('将显示在这里')) {
@@ -280,25 +280,25 @@ try {
         }
     }
 
-    // 事件监听器  
+    // Event listeners  
     convertButton.addEventListener('click', handleConversion);
     clearButton.addEventListener('click', handleClear);
     copyButton.addEventListener('click', handleCopy);
 
-    // 防抖计时器
+    // Debounce timer
     let inputDebounceTimer = null;
 
-    // 输入实时验证（防抖 300 ms）
+    // Live input validation (300 ms debounce)
     input.addEventListener('input', () => {
-        clearTimeout(inputDebounceTimer);          // 取消上一次的计时器
-        inputDebounceTimer = setTimeout(() => {    // 重新计时
+        clearTimeout(inputDebounceTimer);          // cancel previous timer
+        inputDebounceTimer = setTimeout(() => {    // start a new timer
             const mode = modeSelect ? modeSelect.value : 'disassemble';
             const validation = mode === 'assemble' ? validateAsmInput(input.value) : validateHexInput(input.value);
             updateInputStatus(validation);
-        }, 300);  // 300 ms 内没再输入才真正执行
+        }, 300);  // execute only if no input within 300 ms
     });
 
-    // 模式切换时更新占位与按钮文字
+    // Update placeholders and button text when mode changes
     function updateModeUI() {
         const mode = modeSelect ? modeSelect.value : 'disassemble';
         const buttonSpan = convertButton.querySelector('span');
@@ -313,7 +313,7 @@ try {
             inputDisplay.innerHTML = '<div style="color: #666; font-style: italic;">输入的机器码将显示在这里...</div>';
             outputDisplay.innerHTML = '<div style="color: #666; font-style: italic;">反汇编结果将显示在这里...</div>';
         }
-        // 重新校验
+        // Re-validate
         const validation = mode === 'assemble' ? validateAsmInput(input.value) : validateHexInput(input.value);
         updateInputStatus(validation);
     }
@@ -322,21 +322,21 @@ try {
         updateModeUI();
     }
 
-    // 键盘快捷键  
+    // Keyboard shortcuts  
     document.addEventListener('keydown', (event) => {
-        // Ctrl+Enter: 执行转换  
+        // Ctrl+Enter: perform conversion  
         if (event.ctrlKey && event.key === 'Enter') {
             event.preventDefault();
             handleConversion();
         }
 
-        // Esc: 清空输入  
+        // Esc: clear input  
         if (event.key === 'Escape') {
             event.preventDefault();
             handleClear();
         }
 
-        // F1: 切换快捷键提示  
+        // F1: toggle shortcuts hint  
         if (event.key === 'F1') {
             event.preventDefault();
             keyboardShortcutsVisible = !keyboardShortcutsVisible;
@@ -344,7 +344,7 @@ try {
         }
     });
 
-    // 初始化时聚焦到输入框  
+    // Focus input on initialization  
     input.focus();
 
 } catch (error) {
@@ -353,7 +353,7 @@ try {
         '<span class="assembly-error">Error loading the WebAssembly module.</span>';
 }
 
-// 全局函数供 HTML 调用  
+// Global functions for HTML calls  
 window.toggleHelp = function () {
     const helpContent = document.getElementById('helpContent');
     helpContent.classList.toggle('show');
@@ -364,7 +364,7 @@ window.loadExample = function (example) {
     input.value = example;
     input.focus();
 
-    // 触发输入验证  
+    // Trigger input validation  
     const event = new Event('input', { bubbles: true });
     input.dispatchEvent(event);
 };

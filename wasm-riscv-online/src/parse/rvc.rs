@@ -87,7 +87,7 @@ pub(crate) fn try_parse(mnem: &str, ops: &[String], xlen: Xlen) -> Option<Result
             let ci = CIType { rdrs1: rd, funct3: 0, imm: Imm::new(sh, 6) };
             Some(Ok(RVC::Cslli(ci).into()))
         }
-        // c.srli rd, shamt  (rd 应为压缩寄存器，编码阶段校验)
+        // c.srli rd, shamt  (rd should be a compressed register; validated during encoding)
         "c.srli" => {
             if ops.len() != 2 { return Some(Err("用法: c.srli rd, shamt".into())); }
             let rd = match parse_register(&ops[0]) { Ok(v) => v, Err(e) => return Some(Err(e)) };

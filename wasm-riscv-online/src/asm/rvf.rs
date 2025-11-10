@@ -1,6 +1,6 @@
 use super::{to_register, IType, R4Type, RType, SType};  
   
-// 添加浮点寄存器转换函数 
+// Convert to floating-point register name 
 fn to_fp_register(ins: u8) -> String {  
     match ins {  
         0..=31 => format!("f{}", ins),  
@@ -60,7 +60,7 @@ impl RVF {
                 to_register(s.rs1)  
             ),  
               
-            // Fused multiply-add - 四操作数格式  
+            // Fused multiply-add - four-operand format  
             Self::Fmadds(r4) => format!(  
                 "fmadd.s {}, {}, {}, {}",  
                 to_fp_register(r4.rd),  
@@ -90,7 +90,7 @@ impl RVF {
                 to_fp_register(r4.rs3)  
             ),  
               
-            // 算术运算 - 三操作数格式  
+            // Arithmetic - three-operand format  
             Self::Fadds(r) => format!(  
                 "fadd.s {}, {}, {}",  
                 to_fp_register(r.rd),  
@@ -133,7 +133,7 @@ impl RVF {
                 to_fp_register(r.rs2)  
             ),  
               
-            // 符号注入  
+            // Sign injection  
             Self::Fsgnjs(r) => format!(  
                 "fsgnj.s {}, {}, {}",  
                 to_fp_register(r.rd),  
@@ -153,7 +153,7 @@ impl RVF {
                 to_fp_register(r.rs2)  
             ),  
               
-            // 比较 - 结果写入整数寄存器  
+            // Comparison - result written to integer register  
             Self::Feqs(r) => format!(  
                 "feq.s {}, {}, {}",  
                 to_register(r.rd),  
@@ -173,7 +173,7 @@ impl RVF {
                 to_fp_register(r.rs2)  
             ),  
               
-            // 转换指令  
+            // Conversion instructions  
             Self::Fcvtws(r) => format!(  
                 "fcvt.w.s {}, {}",  
                 to_register(r.rd),  
@@ -195,7 +195,7 @@ impl RVF {
                 to_register(r.rs1)  
             ),  
               
-            // 搬移指令  
+            // Move instructions  
             Self::Fmvxw(r) => format!(  
                 "fmv.x.w {}, {}",  
                 to_register(r.rd),  
@@ -207,14 +207,14 @@ impl RVF {
                 to_register(r.rs1)  
             ),  
               
-            // 分类指令  
+            // Classification instruction  
             Self::Fclasss(r) => format!(  
                 "fclass.s {}, {}",  
                 to_register(r.rd),  
                 to_fp_register(r.rs1)  
             ),  
               
-            // RV64F 扩展  
+            // RV64F extension  
             Self::Fcvtls(r) => format!(  
                 "fcvt.l.s {}, {}",  
                 to_register(r.rd),  
