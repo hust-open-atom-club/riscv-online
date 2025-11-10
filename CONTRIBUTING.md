@@ -1,12 +1,12 @@
 # 欢迎贡献
 
-感谢您对 RISC-V 在线反汇编工具项目的关注！这是一个基于 WebAssembly 的 RISC-V 反汇编器，支持多种指令集扩展。
+感谢您对 RobustOne Online 项目的关注！这是一个基于 WebAssembly 的 RISC-V 反汇编器，支持多种指令集扩展。
 
 ## 项目概述
 
-本项目是一个 Web 端 RISC-V 反汇编工具，将十六进制机器码转换为人类可读的汇编语言。系统采用 Rust 后端编译为 WebAssembly，配合 JavaScript 前端实现高性能的实时反汇编功能。
+RobustOne Online 是一个 Web 端 RISC-V 反汇编工具，将十六进制机器码转换为人类可读的汇编语言。系统采用 Rust 后端编译为 WebAssembly，配合 JavaScript 前端实现高性能的实时反汇编功能。
 
-支持的指令集包括：RV32I、RV64I、RVC（压缩指令）、RVF（浮点）和 RVZicsr（控制状态寄存器）。
+支持的指令集包括：RV32I、RV64I、RVM（乘除法）、RVC（压缩指令）、RV32F、RV64F（浮点）、RVZicsr（控制状态寄存器）、RV32A、RV64A 和 RV128A（原子操作）。
 
 ## 开发环境设置
 
@@ -28,8 +28,8 @@
 1. 克隆仓库：
 
 ```bash
-git clone <git@github.com>:hust-open-atom-club/riscv-online.git  
-cd riscv-online/wasm-riscv-online/www
+git clone https://github.com/hust-open-atom-club/robustone-online.git  
+cd robustone-online/wasm-riscv-online/www
 ```
 
 2. 编译 Rust 到 WebAssembly：
@@ -168,6 +168,7 @@ cargo test
 
 ## 许可证
 
-本项目使用木兰宽松许可证，第 2 版（Mulan PSL v2）。LICENSE:1-2
+本项目使用木兰宽松许可证，第 2 版（Mulan PSL v2）。  
+详见 [LICENSE](LICENSE) 文件。
 
 贡献代码即表示您同意在相同许可证下发布您的贡献。
