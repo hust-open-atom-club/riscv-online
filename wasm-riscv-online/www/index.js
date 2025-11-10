@@ -1,6 +1,11 @@
 import * as wasm from 'wasm-riscv-online';
 
 const PROCESSING_DELAY_MS = 500;
+// Hoisted reusable regex patterns
+const RE_LINE_BREAKS = /\r\n/g;
+const RE_BYTE_STREAM = /^([0-9a-fA-F]{2}(\s+|$))+$/;
+const RE_HEX_LINE = /^(0x|0X)?[0-9a-fA-F]+$/;
+const RE_TWO_HEX = /^[0-9a-fA-F]{2}$/;
 
 // Global state  
 let isProcessing = false;
@@ -27,19 +32,17 @@ try {
             return { valid: false, message: '请输入内容', type: 'warning' };
         }
 
-        // Detect 010 Editor byte stream format
-        const byteStreamPattern = /^([0-9a-fA-F]{2}(\s+|$))+$/;
-        if (byteStreamPattern.test(trimmed.replace(/\r\n/g, '\n').split('\n').map(l => l.trim()).join(' '))) {
+        // 判断是否为010字节流
+        if (RE_BYTE_STREAM.test(trimmed.replace(RE_LINE_BREAKS, '\n').split('\n').map(l => l.trim()).join(' '))) {
             return { valid: true, message: '字节流格式', type: 'valid', format: 'byteStream' };
         }
 
         // Otherwise, validate each non-empty line as a hex string
         const lines = value.split('\n').filter(line => line.trim());
-        const hexPattern = /^(0x|0X)?[0-9a-fA-F]+$/;
 
-        for (let line of lines) {
-            const cleanLine = line.trim();
-            if (!hexPattern.test(cleanLine)) {
+        for (let i = 0; i < lines.length; i++) {
+            const cleanLine = lines[i].trim();
+            if (!RE_HEX_LINE.test(cleanLine)) {
                 return { valid: false, message: '包含无效的十六进制格式', type: 'error', format: null };
             }
         }
@@ -75,12 +78,13 @@ try {
     
     // Parse 010 Editor byte stream into per-line hex instructions
     function parseByteStream(value) {
-        // Normalize whitespace and split byte tokens (each must be two hex digits)
-        const tokens = value.replace(/\r\n/g, '\n').split(/\s+/).filter(Boolean);
+        // 规范化空白并分割字节 token（每个 token 应为两位十六进制）
+        const tokens = value.replace(RE_LINE_BREAKS, '\n').split(/\s+/).filter(Boolean);
         if (tokens.length === 0) return [];
 
-        for (const t of tokens) {
-            if (!/^[0-9a-fA-F]{2}$/.test(t)) {
+        for (let i = 0; i < tokens.length; i++) {
+            const t = tokens[i];
+            if (!RE_TWO_HEX.test(t)) {
                 throw new Error(`非法字节 token: "${t}"`);
             }
         }
