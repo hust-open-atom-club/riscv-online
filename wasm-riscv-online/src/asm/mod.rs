@@ -7,6 +7,8 @@ pub use rvzicsr::RVZicsr;
 pub use rva::RV32A;
 pub use rva::RV64A;
 pub use rva::RV128A;
+pub use rv64d::RV64D;
+pub use rvb::RVB;
 use crate::riscv::imm::{Imm, Uimm};
 
 pub mod rv32i;
@@ -15,6 +17,8 @@ pub mod rvc;
 pub mod rvf;
 pub mod rvzicsr;
 pub mod rva;
+pub mod rv64d;
+pub mod rvb;
 
 #[derive(Debug, Clone, Copy)]
 pub enum Instruction {
@@ -26,6 +30,8 @@ pub enum Instruction {
     RV32A(RV32A),
     RV64A(RV64A),
     RV128A(RV128A),
+    RV64D(RV64D),
+    RVB(RVB),
 }
 
 impl Instruction {
@@ -39,6 +45,8 @@ impl Instruction {
             Self::RV32A(rv32a) => rv32a.to_string(),
             Self::RV64A(rv64a) => rv64a.to_string(),
             Self::RV128A(rv128a) => rv128a.to_string(),
+            Self::RV64D(rv64d) => rv64d.to_string(),
+            Self::RVB(rvb) => rvb.to_string(),
         }
     }
 }
@@ -88,6 +96,28 @@ impl From<RV64A> for Instruction {
 impl From<RV128A> for Instruction {
     fn from(src: RV128A) -> Instruction {
         Instruction::RV128A(src)
+    }
+}
+
+impl From<RV64D> for Instruction {
+    fn from(src: RV64D) -> Instruction {
+        Instruction::RV64D(src)
+    }
+}
+
+impl From<RVB> for Instruction {
+    fn from(src: RVB) -> Instruction {
+        Instruction::RVB(src)
+    }
+}
+
+impl Instruction {
+    pub fn to_string(&self) -> String {
+        match self {
+            Self::RV64D(instr) => instr.to_string(),
+            Self::RVB(instr) => instr.to_string(),
+            _ => String::from("Unimplemented instruction"),
+        }
     }
 }
 
@@ -266,14 +296,24 @@ fn to_register(ins: u8) -> String {
 
 pub fn from_register(name: &str) -> Option<u8> {
     let s = name.trim().to_lowercase();
-    // xN numeric
+    
+    // 浮点寄存器 - fN 格式
+    if let Some(num) = s.strip_prefix('f') {
+        if let Ok(n) = num.parse::<u8>() {
+            if n <= 31 { return Some(n); }
+        }
+    }
+    
+    // 整数寄存器 - xN 格式
     if let Some(num) = s.strip_prefix('x') {
         if let Ok(n) = num.parse::<u8>() {
             if n <= 31 { return Some(n); }
         }
     }
+    
     // ABI names
     match s.as_str() {
+        // 整数寄存器
         "zero" => Some(0),
         "ra" => Some(1),
         "sp" => Some(2),
@@ -306,6 +346,41 @@ pub fn from_register(name: &str) -> Option<u8> {
         "t4" => Some(29),
         "t5" => Some(30),
         "t6" => Some(31),
+        
+        // 浮点寄存器
+        "ft0" => Some(0),
+        "ft1" => Some(1),
+        "ft2" => Some(2),
+        "ft3" => Some(3),
+        "ft4" => Some(4),
+        "ft5" => Some(5),
+        "ft6" => Some(6),
+        "ft7" => Some(7),
+        "fs0" => Some(8),
+        "fs1" => Some(9),
+        "fa0" => Some(10),
+        "fa1" => Some(11),
+        "fa2" => Some(12),
+        "fa3" => Some(13),
+        "fa4" => Some(14),
+        "fa5" => Some(15),
+        "fa6" => Some(16),
+        "fa7" => Some(17),
+        "fs2" => Some(18),
+        "fs3" => Some(19),
+        "fs4" => Some(20),
+        "fs5" => Some(21),
+        "fs6" => Some(22),
+        "fs7" => Some(23),
+        "fs8" => Some(24),
+        "fs9" => Some(25),
+        "fs10" => Some(26),
+        "fs11" => Some(27),
+        "ft8" => Some(28),
+        "ft9" => Some(29),
+        "ft10" => Some(30),
+        "ft11" => Some(31),
+        
         _ => None,
     }
 }

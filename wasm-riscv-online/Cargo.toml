@@ -7,6 +7,10 @@ edition = "2018"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[[bin]]
+name = "verify_features"
+path = "verify_features.rs"
+
 [features]
 default = ["console_error_panic_hook"]
 

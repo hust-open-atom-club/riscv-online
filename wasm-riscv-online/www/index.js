@@ -181,9 +181,9 @@ try {
 
         // Basic syntax highlighting  
         return text
-            .replace(/\b(add|sub|mul|div|addi|subi|lw|sw|beq|bne|jal|jalr|nop|ret|li)\b/gi,
+            .replace(/\b(add|sub|mul|div|addi|subi|lw|sw|beq|bne|jal|jalr|nop|ret|li|fld|fsd|fadd\.d|binv|bset|bseti|bexti|binvi|andn|orn|xnor|ror|rori|rorw|roriw)\b/gi,
                 '<span class="assembly-instruction">$1</span>')
-            .replace(/\b(x[0-9]+|zero|ra|sp|gp|tp|t[0-6]|s[0-9]+|a[0-7])\b/g,
+            .replace(/\b(x[0-9]+|zero|ra|sp|gp|tp|t[0-6]|s[0-9]+|a[0-7]|f[0-9]+|ft[0-6]|fs[0-9]+|fa[0-7])\b/g,
                 '<span class="assembly-register">$1</span>')
             .replace(/\b(-?0x[0-9a-fA-F]+|-?[0-9]+)\b/g,
                 '<span class="assembly-immediate">$1</span>');

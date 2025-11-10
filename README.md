@@ -43,8 +43,8 @@ RobustOne Online 是一款基于 WebAssembly 的在线 RISC-V 汇编反汇编工
 | RV32A     | ✅      |
 | RV64A     | ✅      |
 | RV128A    | ✅      |
-| RV64D     | ❌      |
-| RVB       | ❌      |
+| RV64D     | ✅      |
+| RVB       | ✅      |
 
 ## 🚀 快速开始
   

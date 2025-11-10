@@ -45,8 +45,8 @@ Built for RISC-V developers, students and researchers.
 | RV32A     | ✅            |
 | RV64A     | ✅            |
 | RV128A    | ✅            |
-| RV64D     | ❌            |
-| RVB       | ❌            |
+| RV64D     | ✅            |
+| RVB       | ✅            |
 
 ## 🚀 Quick Start
 

@@ -91,9 +91,10 @@ pub const FUNCT3_MISC_MEM_FENCE_I: u8 = 0b001;
 pub const FUNCT3_WIDTH_W: u8 = 0b010;
 
 // =========================
-// Floating-point encodings (RVF)
+// Floating-point encodings (RVF/RVD)
 // =========================
 pub const FUNCT2_FMT_S: u8 = 0b00; // single-precision
+pub const FUNCT2_FMT_D: u8 = 0b01; // double-precision
 
 pub const FUNCT_RS3_FP_ADD: u8 = 0b00000;
 pub const FUNCT_RS3_FP_SUB: u8 = 0b00001;
@@ -143,8 +144,76 @@ pub const FUNCT5_A_AMOMAXU: u8 = 0b11100;
 pub const FUNCT3_A_WIDTH_Q: u8 = 0b100;
 
 // =========================
+// Bit Manipulation (B-extension)
+// =========================
+pub const FUNCT3_BSET: u8 = 0b000;
+pub const FUNCT3_BEXT: u8 = 0b001;
+pub const FUNCT3_BINV: u8 = 0b010;
+pub const FUNCT3_GREVI: u8 = 0b010;
+pub const FUNCT3_GORC: u8 = 0b010;
+pub const FUNCT3_ANDN: u8 = 0b000;
+pub const FUNCT3_ORN: u8 = 0b001;
+pub const FUNCT3_XNOR: u8 = 0b010;
+pub const FUNCT3_ROR: u8 = 0b101;
+pub const FUNCT3_BSETW: u8 = 0b000;
+pub const FUNCT3_BEXTW: u8 = 0b001;
+pub const FUNCT3_BINVW: u8 = 0b010;
+pub const FUNCT3_GREVIW: u8 = 0b010;
+pub const FUNCT3_GORCW: u8 = 0b010;
+pub const FUNCT3_RORW: u8 = 0b101;
+
+// B-extension funct7 values
+pub const FUNCT7_B_BSET: u8 = 0b0010000;
+pub const FUNCT7_B_BEXT: u8 = 0b0010000;
+pub const FUNCT7_B_BINV: u8 = 0b0010000;
+pub const FUNCT7_B_BSETI: u8 = 0b0010000;
+pub const FUNCT7_B_BEXTI: u8 = 0b0010000;
+pub const FUNCT7_B_BINVI: u8 = 0b0010000;
+pub const FUNCT7_B_GREVI: u8 = 0b0010000;
+pub const FUNCT7_B_GREVIW: u8 = 0b0010000;
+pub const FUNCT7_B_GORC: u8 = 0b0010000;
+pub const FUNCT7_B_GORCW: u8 = 0b0010000;
+pub const FUNCT7_B_GORHI: u8 = 0b0010100;
+pub const FUNCT7_B_GORHIW: u8 = 0b0010100;
+pub const FUNCT7_B_GXORI: u8 = 0b0010100;
+pub const FUNCT7_B_GXORIW: u8 = 0b0010100;
+pub const FUNCT7_B_ANDN: u8 = 0b0110000;
+pub const FUNCT7_B_ORN: u8 = 0b0110000;
+pub const FUNCT7_B_XNOR: u8 = 0b0110000;
+pub const FUNCT7_B_ROR: u8 = 0b0110000;
+pub const FUNCT7_B_RORW: u8 = 0b0110000;
+pub const FUNCT7_B_RORI: u8 = 0b0110000;
+pub const FUNCT7_B_RORIW: u8 = 0b0110000;
+pub const FUNCT7_B_CPOP: u8 = 0b0110000;
+pub const FUNCT7_B_CPOPW: u8 = 0b0110000;
+pub const FUNCT7_B_CTZ: u8 = 0b0110000;
+pub const FUNCT7_B_CTZW: u8 = 0b0110000;
+pub const FUNCT7_B_CLZ: u8 = 0b0110000;
+pub const FUNCT7_B_CLZW: u8 = 0b0110000;
+pub const FUNCT7_B_FFS: u8 = 0b0110000;
+pub const FUNCT7_B_FFSW: u8 = 0b0110000;
+pub const FUNCT7_B_PACK: u8 = 0b0110000;
+pub const FUNCT7_B_PACKW: u8 = 0b0110000;
+
+// B-extension funct6 values for CR-type instructions
+pub const FUNCT6_B_CLZ: u8 = 0b101001;
+pub const FUNCT6_B_CTZ: u8 = 0b101010;
+pub const FUNCT6_B_CPOP: u8 = 0b101011;
+pub const FUNCT6_B_PACK: u8 = 0b101100;
+pub const FUNCT6_B_PACKW: u8 = 0b101101;
+pub const FUNCT6_B_FFS: u8 = 0b101110;
+
+// =========================
 // Compressed (RVC) opcodes (2-bit)
 // =========================
 pub const OPCODE_C0: u16 = 0b00;
 pub const OPCODE_C1: u16 = 0b01;
 pub const OPCODE_C2: u16 = 0b10;
+
+// RVD-specific funct5/funct7 values
+pub const FUNCT_RS3_FP_CVTD: u8 = 0b11000; // fcvt.{w|l}[u].d
+pub const FUNCT_RS3_FP_XCVTFD: u8 = 0b11010; // fcvt.d.{w|l}[u]
+pub const FUNCT_RS3_FP_FMVXD: u8 = 0b11100; // fmv.x.d / fclass.d
+pub const FUNCT_RS3_FP_XMVFD: u8 = 0b11110; // fmv.d.x
+pub const FUNCT_RS3_FP_FCVTSD: u8 = 0b11000; // for fcvt.s.d and fcvt.d.s
+
