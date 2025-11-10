@@ -1,12 +1,12 @@
 <div align="center">
 
-# RISC-V Online 🚀
+# RobustOne Online 🚀
 
 [![License](https://img.shields.io/badge/License-Mulan%20PSL%20v2-blue.svg)](http://license.coscl.org.cn/MulanPSL2)
 [![WebAssembly](https://img.shields.io/badge/WebAssembly-654FF0?logo=webassembly&logoColor=white)](https://webassembly.org/)
 [![Rust](https://img.shields.io/badge/Rust-000000?logo=rust&logoColor=white)](https://www.rust-lang.org/)
 [![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
-<!-- [![Build Status](https://travis-ci.org/hust-open-atom-club/riscv-online.svg?branch=main)](https://travis-ci.org/hust-open-atom-club/riscv-online) -->
+<!-- [![Build Status](https://travis-ci.org/hust-open-atom-club/robustone-online.svg?branch=main)](https://travis-ci.org/hust-open-atom-club/robustone-online) -->
 
 **🌐 Web-based RISC-V Disassembly Tool**
 
@@ -16,7 +16,8 @@
 
 ## ✨ Project Overview
 
-**RISC-V Online** is a zero-install, browser-based RISC-V disassembler powered by WebAssembly.  
+**RobustOne Online** is a zero-install, browser-based RISC-V disassembler powered by WebAssembly. By compiling Rust to WebAssembly, we deliver high-performance real-time disassembly functionality that runs directly in your browser with no installation or configuration required.
+
 Built for RISC-V developers, students and researchers.
 
 **15-second pitch:** Paste hex machine code, instantly get human-readable RISC-V assembly — no setup, all in your browser!
@@ -41,7 +42,9 @@ Built for RISC-V developers, students and researchers.
 | RV32F     | ✅            |
 | RV64F     | ✅            |
 | RVZicsr   | ✅            |
-| RV32A     | ❌            |
+| RV32A     | ✅            |
+| RV64A     | ✅            |
+| RV128A    | ✅            |
 | RV64D     | ❌            |
 | RVB       | ❌            |
 
@@ -51,8 +54,8 @@ Built for RISC-V developers, students and researchers.
 
 ```bash
 # Clone the repo
-git clone https://github.com/hust-open-atom-club/riscv-online.git
-cd riscv-online
+git clone https://github.com/hust-open-atom-club/robustone-online.git
+cd robustone-online
 
 # Build the WebAssembly module
 cd wasm-riscv-online
@@ -82,7 +85,7 @@ Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ### Quick Ways to Help
 
-- 🐛 **Report Bugs** – [Open an Issue](https://github.com/hust-open-atom-club/riscv-online/issues/new)  
+- 🐛 **Report Bugs** – [Open an Issue](https://github.com/hust-open-atom-club/robustone-online/issues/new)  
 - ✨ **Add Features** – Fork → Hack → Pull Request  
 - 📝 **Improve Docs** – Better README, examples, tutorials  
 - 🧪 **Add Tests** – Increase test coverage  
